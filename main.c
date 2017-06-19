@@ -28,24 +28,31 @@ char *var_array[SIZE];
 
 //-----------------------------------------
 // external functions
+
 int push(int);
 void start_interpreter(instruction_node*, int*);
 int htod(char*);
-//-----------------------------------------
-
-
-void print_var_array(int);
 void printll(instruction_node*);
 void push_ll(instruction_node**, int, int, int);
 int deter_len(char *opcode);
 unsigned char *next_byte(unsigned char*,char *opcode);
+unsigned char *push_ll_wrapper(unsigned char*,instruction_node*, int, char*,int, int, int );
+
+//-----------------------------------------
+
+
+void print_var_array(int);
+
+
+
+
 unsigned char *create_var_array(char*, int, unsigned char*, int);
 
 int main(int argc , char **argv){
 
   if(argc < 2){
 
-    printf("Need compiled python file as cmd line argument\n Program exited\n");
+    printf("Need compiled python file as cmd line argument\nProgram exited\n");
     exit(0);
   }else{
     FILE *pyc_pointer;
@@ -87,7 +94,7 @@ int main(int argc , char **argv){
        ; //do nothing
      
      }else if(len ==2 && strcmp(opcode,"64") == 0){ // 64 load_const 
-      
+       
        opcode_arg =64;
        hex_str_p = next_byte(hex_str_p,opcode);
        pos_arg =atoi(opcode);
@@ -95,17 +102,20 @@ int main(int argc , char **argv){
        snd_pos_arg = atoi(opcode);
        push_ll(&head, opcode_arg,pos_arg,snd_pos_arg);
       
-        
+       
+      
      
      }else if(len == 2 && strcmp(opcode,"5A") ==0){ // store name
-
+       
        opcode_arg = htod("5A"); // converted 5A as 90 
        hex_str_p = next_byte(hex_str_p,opcode);
        pos_arg = atoi(opcode);
        hex_str_p = next_byte(hex_str_p,opcode);
        snd_pos_arg = atoi(opcode);
        push_ll(&head,opcode_arg, pos_arg, snd_pos_arg);
-      
+       
+	
+       
      }else if(len == 2 && strcmp(opcode,"65") == 0){ // load name
 
        opcode_arg = 65;
@@ -225,79 +235,6 @@ unsigned char *create_var_array(char *opcode, int counter, unsigned char *hex_st
   var_array[opcode_seventyfour] = each_var;
   return hex_str_p;
   
-}
-
-unsigned char *next_byte(unsigned char *hex_str_p, char *opcode){
-
-     opcode[0] = *hex_str_p;
-     opcode[1] = *(hex_str_p +1);
-     opcode[2] = '\0';
-     //printf("%s\t",opcode);
-     hex_str_p++;
-     hex_str_p++;
-     return hex_str_p;
-     
-
-  
-}
-
-int deter_len(char *opcode){
-
-  if(strcmp(opcode,"73") == 0 || strcmp(opcode,"69") == 0) // start
-    return 4;
-  else if(strcmp(opcode, "64") == 0 || strcmp(opcode, "5A") == 0 || strcmp(opcode, "65") == 0) //load const, store_name , load_name
-    return 2;
-  else if(strcmp(opcode,"17") == 0 || strcmp(opcode,"47") == 0 || strcmp(opcode,"48") == 0 || strcmp(opcode, "53") == 0 || strcmp(opcode,"18") == 0 || strcmp(opcode,"15") == 0 || strcmp(opcode, "14") == 0) //binary_add, print_item, print_new_line
-    return 0;
-  else if(strcmp(opcode,"74") == 0)
-    return 4;
-  else
-    return -1;
-}
-
-void printll(instruction_node *ll){
-  printf("call\t");
-  instruction_node *current;
-  for(current = ll;current != NULL; current= current->next){
-
-    // printf("inside ll\t'");
-    printf("\n%d\t",current->opcode);
-    printf("%d\t",current->pos);
-    printf("%d\n",current->snd_pos);
-    
-  }
-  
-}
-
-void push_ll(instruction_node **headRef, int opcode, int pos, int snd_pos){ // creates ll on the go
-
-  instruction_node *current = *headRef;
-  instruction_node* newNode;
-  newNode =(instruction_node*)malloc(sizeof(instruction_node));
-  if(newNode == NULL){
-
-    printf("Cant Allocate\n");
-    exit(0);
-  }
-  newNode->opcode = opcode;
-  newNode->pos = pos;
-  newNode->snd_pos = snd_pos;
-  newNode->next = NULL;
-  //printf("%d %d %d\t",opcode,pos,snd_pos);
-  
-  if(current == NULL){
-    
-    *headRef = newNode;
-    
-    
-  }else{
-    while(current->next != NULL){
-      current = current->next;
-    }
-    
-
-    current->next = newNode;
-  }
 }
 
 

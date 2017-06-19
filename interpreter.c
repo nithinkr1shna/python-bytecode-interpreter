@@ -3,30 +3,20 @@
 #include<stdlib.h>
 #include<math.h>
 #include "include.h"
+#include  "functions.h"
 
 void push_stack(int);
 int pop(void);
-void printls(instruction_node*);
+void printll(instruction_node*);
 void interpreter_loop(instruction_node*, int*);
 extern int len_const_array;
 void start_interpreter(instruction_node* instruction_set, int* constants){
   
-  printls(instruction_set);
+  printll(instruction_set);
   interpreter_loop(instruction_set, constants);
 }
 
-void printls(instruction_node *ll){
-  printf("call @interpreter\t");
-  instruction_node *current;
-  for(current = ll;current != NULL; current= current->next){
 
-    // printf("inside ll\t'");
-    printf("\n%d\t",current->opcode);
-    printf("%d\t",current->pos);
-    printf("%d\n",current->snd_pos);
-    
-  }
-}
 
 void interpreter_loop( instruction_node* instructions, int *constants){
 
@@ -38,13 +28,9 @@ void interpreter_loop( instruction_node* instructions, int *constants){
     if(strcmp(str,"17")==0){ // binary add
       int x,y;
       x =pop();
-      //printf("%d \n",x);
       y= pop();
-      //printf("%d\n",y);
       push_stack(x+y);
 
-      //printf("sum is %d",x+y);
-      // printf("len_const_ary %d",len_const_array);
     }else if(strcmp(str,"47")==0){
       int x;
       x = pop();
