@@ -93,7 +93,8 @@ int main(int argc , char **argv){
       
        ; //do nothing
      
-     }else if(len ==2 && strcmp(opcode,"64") == 0){ // 64 load_const 
+     }else if(len ==2 && strcmp(opcode,"64") == 0){ // 64 load_const   both positions should be
+       // converted to a single integer value
        
        opcode_arg =64;
        hex_str_p = next_byte(hex_str_p,opcode);
@@ -125,6 +126,15 @@ int main(int argc , char **argv){
        snd_pos_arg = atoi(opcode);
        push_ll(&head, opcode_arg, pos_arg, snd_pos_arg);
        
+     }else if(len == 2 && strcmp(opcode,"6B") == 0){  // if
+       // the two bytes after  6B is index , make it as a single unit         
+       opcode_arg = htod(opcode);
+       hex_str_p = next_byte(hex_str_p, opcode);
+       pos_arg = htod(opcode);
+       hex_str_p = next_byte(hex_str_p, opcode);
+       snd_pos_arg = htod(opcode);
+       push_ll(&head,opcode_arg,pos_arg,snd_pos_arg); 
+       
      }else if(len ==0 && strcmp(opcode,"17") == 0){ // binary add
 
        opcode_arg =17;
@@ -132,49 +142,49 @@ int main(int argc , char **argv){
        snd_pos_arg =-1;
        push_ll(&head,opcode_arg,pos_arg,snd_pos_arg);
        
-     }else if(len ==0  && strcmp(opcode,"18") == 0){
+     }else if(len ==0  && strcmp(opcode,"18") == 0){ // sub
 
        opcode_arg = 18;
        pos_arg =-1;
        snd_pos_arg =-1;
        push_ll(&head,opcode_arg,pos_arg,snd_pos_arg);
        
-     }else if(len ==0 && strcmp(opcode,"15") == 0){
+     }else if(len ==0 && strcmp(opcode,"15") == 0){ //div
 
        opcode_arg =15;
        pos_arg =-1;
        snd_pos_arg =-1;
        push_ll(&head,opcode_arg,pos_arg,snd_pos_arg);
        
-     }else if(len == 0 && strcmp(opcode,"14") ==0){
+     }else if(len == 0 && strcmp(opcode,"14") ==0){ // mul
 
        opcode_arg =14;
         pos_arg =-1;
        snd_pos_arg =-1;
        push_ll(&head,opcode_arg,pos_arg,snd_pos_arg);
        
-     }else if(len ==0 && strcmp(opcode,"47") == 0){
+     }else if(len ==0 && strcmp(opcode,"47") == 0){ //print
 
        opcode_arg =47;
        pos_arg =-1;
        snd_pos_arg =-1;
        push_ll(&head, opcode_arg, pos_arg, snd_pos_arg);
        
-     }else if(len == 0 && strcmp(opcode,"48") == 0){
+     }else if(len == 0 && strcmp(opcode,"48") == 0){ //print new line
 
        opcode_arg =48;
        pos_arg = -1;
        snd_pos_arg = -1;
        push_ll(&head, opcode_arg, pos_arg, snd_pos_arg);
        
-     }else if(len == 0 && strcmp(opcode,"53") == 0){
+     }else if(len == 0 && strcmp(opcode,"53") == 0){ // return 
 
        opcode_arg = 53;
        pos_arg= -1;
        snd_pos_arg = -1;
        push_ll(&head, opcode_arg, pos_arg, snd_pos_arg);
        
-     }else if(len == 4 && strcmp(opcode,"74") == 0){
+     }else if(len == 4 && strcmp(opcode,"74") == 0){ 
        opcode_seventyfour = opcode_seventyfour +1;
        opcode_arg = 74;
        hex_str_p = next_byte(hex_str_p, opcode);
@@ -187,7 +197,7 @@ int main(int argc , char **argv){
        hex_str_p = create_var_array(opcode,counter_pos_arg,hex_str_p,opcode_seventyfour);
        push_ll(&head, opcode_arg, pos_arg, snd_pos_arg);
        
-     }else if(len == 4 && strcmp(opcode, "69") ==0 ){ //store constants
+     }else if(len == 4 && strcmp(opcode, "69") ==0 ){  //store constants / load attribs
        
         for(j=len;j>0;j--){
 	 

@@ -90,7 +90,7 @@ int deter_len(char *opcode){
 
   if(strcmp(opcode,"73") == 0 || strcmp(opcode,"69") == 0) // start
     return 4;
-  else if(strcmp(opcode, "64") == 0 || strcmp(opcode, "5A") == 0 || strcmp(opcode, "65") == 0) //load const, store_name , load_name
+  else if(strcmp(opcode, "64") == 0 || strcmp(opcode, "5A") == 0 || strcmp(opcode, "65") == 0 || strcmp(opcode,"6B") == 0) //load const, store_name , load_name
     return 2;
   else if(strcmp(opcode,"17") == 0 || strcmp(opcode,"47") == 0 || strcmp(opcode,"48") == 0 || strcmp(opcode, "53") == 0 || strcmp(opcode,"18") == 0 || strcmp(opcode,"15") == 0 || strcmp(opcode, "14") == 0) //binary_add, print_item, print_new_line
     return 0;
