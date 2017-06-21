@@ -20,6 +20,7 @@ typedef struct instruction{
 instruction_node *head = NULL;
 
 int *const_array;
+int *name_array;
 
 //int const_array_pos[SIZE];
 
@@ -91,8 +92,23 @@ int main(int argc , char **argv){
      //printf("len %d\t", len);
      if(len == 4 && strcmp(opcode,"73") ==0 ){
       
-       ; //do nothing
+       opcode_arg = 73;
+       pos_arg =-1;
+       snd_pos_arg = -1;
+       push_ll(&head, opcode_arg,pos_arg,snd_pos_arg); 
      
+
+
+     }else if(len ==2 && strcmp(opcode,"6E") == 0){
+
+       opcode_arg = htod("6E");
+       hex_str_p = next_byte(hex_str_p,opcode);
+       pos_arg = atoi(opcode);
+       hex_str_p = next_byte(hex_str_p,opcode);
+       snd_pos_arg = atoi(opcode);
+       push_ll(&head,opcode_arg, pos_arg, snd_pos_arg);
+       
+
      }else if(len ==2 && strcmp(opcode,"64") == 0){ // 64 load_const   both positions should be
        // converted to a single integer value
        
@@ -211,7 +227,7 @@ int main(int argc , char **argv){
        printf("%s\t",strrev(values));
        printf("%d", htod(strrev(values))); 
        //push value to array;
-       len_const_array = push(htod(strrev(values))); // pudhing to array of contants
+       len_const_array = push(htod(strrev(values))); // pudhing to array of contants ..   ****
        printf("const_array_len:%d",len_const_array); 
      }
     }

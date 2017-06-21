@@ -9,7 +9,8 @@ extern int *const_array;
 //functions for stack manipulations
 
 // push elements to end of array max size of constants array = SIZE.. // use dynamic allocation to make it dynamic
- int push(int a){
+
+int push(int a){
    int  *ptr;
   static int i=0;
   
@@ -90,7 +91,7 @@ int deter_len(char *opcode){
 
   if(strcmp(opcode,"73") == 0 || strcmp(opcode,"69") == 0) // start
     return 4;
-  else if(strcmp(opcode, "64") == 0 || strcmp(opcode, "5A") == 0 || strcmp(opcode, "65") == 0 || strcmp(opcode,"6B") == 0) //load const, store_name , load_name
+  else if(strcmp(opcode, "64") == 0 || strcmp(opcode, "5A") == 0 || strcmp(opcode, "65") == 0 || strcmp(opcode,"6B") == 0 || strcmp(opcode, "6E") == 0) //load const, store_name , load_name
     return 2;
   else if(strcmp(opcode,"17") == 0 || strcmp(opcode,"47") == 0 || strcmp(opcode,"48") == 0 || strcmp(opcode, "53") == 0 || strcmp(opcode,"18") == 0 || strcmp(opcode,"15") == 0 || strcmp(opcode, "14") == 0) //binary_add, print_item, print_new_line
     return 0;
@@ -149,3 +150,22 @@ void printll(instruction_node *ll){
 }
 
 
+
+int push_gen(int a, int* array){
+   int  *ptr;
+  static int k=0;
+  
+  if(k==0){
+    array =(int*)malloc(sizeof(int) * 1);
+    *array = a;
+  }
+  else{
+
+    ptr = (int*)realloc(array,sizeof(int) *k);
+    *(ptr + k) =a;
+  }
+ 
+  k= k+1;
+  return k;
+    
+}
