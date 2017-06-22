@@ -64,7 +64,7 @@ void interpreter_loop( instruction_node* instructions, int *constants){
       printf("first one %d",first);
       sprintf(snd_str,"%d",current->next->opcode);
       if(strcmp(snd_str,"65") == 0){  // 65 00 00 
-	
+	        if_condition =0;
          	second = const_array[current->next->pos];
 		printf("snd %d",second);
 	        sprintf(thrd_str, "%d",current->next->next->opcode);
@@ -108,61 +108,7 @@ void interpreter_loop( instruction_node* instructions, int *constants){
 
       printf("\n");
    
-    } /*else if(strcmp(str,"65") == 0){
-
-      int item = current->pos;
-      name_pos[name_pos_index] = item;
-      //printf("nm %d",name_pos[name_pos_index]);
-      name_pos_index++;
-     
-    }else if(strcmp(str,"64") == 0){
-
-      int item = current->pos;
-      const_pos[const_pos_index] = item;
-      // printf("cs %d",const_pos[const_pos_index]);
-        const_pos_index++;
-	}*/
-
-
-    /*else if(strcmp(str,"65") == 0) { 
-      static int i =0;
-      int position;
-      char load_const_string[5];
-      char if_string[5];
-      
-      sprintf(load_const_string,"%d",current->next->opcode);
-      if(strcmp(load_const_string,"64") == 0){
-	sprintf(if_string,"%d",current->next->next->opcode);
-	if(strcmp(if_string,"107") == 0){
-        	load_name[i] = current->pos;
-		load_const[i] = current->next->pos;
-        	//printf("position: %d %d", load_name[i], load_const[i]);
-        	i++;
-	
-        }
-      }
-     */
-      
-    /*else if(strcmp(str, "107") == 0){ // if else
-
-      int operation,variable_val=0, constant_val=0;
-     
-      operation = current->pos;
-      if(operation == 5){ // >=
-          
-	//printf("array %d\t",const_array[2]);
-	variable_val = const_array[load_name[index_pos]];
-	constant_val = const_array[load_const[index_pos]];
-	//printf("vals : %d %d",variable_val, constant_val);
-	if(variable_val >= constant_val)
-	  //interpreter_loop(current->next, constants);
-	  
-     
-      }
-     
-      index_pos++;
-     
-      }*/else if(strcmp(str,"6E") ==0 || strcmp(str,"28") == 0){
+    }else if(strcmp(str,"6E") ==0 || strcmp(str,"28") == 0){
 
       break;
     }
@@ -222,28 +168,131 @@ void loop(void){
 		   if_condition = 1;
 		   int operation = current->pos;
 		   if(operation == 5){ // >=
-		     //printf("\tval of first %d\t",first);
-		     //printf("\tval of const %d\t",constant);
-		     if(first >= constant){
+		       //printf("\tval of first %d\t",first);
+		       //printf("\tval of const %d\t",constant);
+		       if(first >= constant){
 
-		       interpreter_loop(current, const_array);
+		             interpreter_loop(current, const_array);
+		       }else{
+
+		             int opc = current->next->opcode;
+		             //printf("opx%d",opc);
+		             while( opc != 110){
+
+		                 current = current->next;
+		                 opc = current->opcode;
+			         //printf("%d\t",opc);
+			 
+		             }
+		       
+		       }
+
+		   }
+		   if(operation == 0){ // <
+
+		       if(first < constant){
+
+		          interpreter_loop(current,const_array);
+		       
+
+		       }else{
+
+		             int opc = current->next->opcode;
+		             //printf("opx%d",opc);
+		             while( opc != 110){
+
+		                  current = current->next;
+		                  opc = current->opcode;
+			          //printf("%d\t",opc);
+		           }
+		     
+		     }
+		   
+		  }
+		  if(operation == 1){ // <=
+
+		       if(first <= constant){
+
+			  interpreter_loop(current,const_array);
+		       
+
+		       }else{
+
+		          int opc = current->next->opcode;
+		          //printf("opx%d",opc);
+		          while( opc != 110){
+
+		                 current = current->next;
+		                 opc = current->opcode;
+			         //printf("%d\t",opc);
+		          }
+		     
+		     }
+		 }
+		 if(operation == 2){ // ==
+
+		       if(first == constant){
+
+		          interpreter_loop(current,const_array);
+		       
+
+		       }else{
+
+		          int opc = current->next->opcode;
+		          //printf("opx%d",opc);
+		          while( opc != 110){
+
+		                  current = current->next;
+		                  opc = current->opcode;
+			          //printf("%d\t",opc);
+		          }
+		     
+		     }
+		}
+		if(operation == 3){ // !=
+
+		     if(first != constant){
+
+			 interpreter_loop(current,const_array);
+		       
+
 		     }else{
 
-		       int opc = current->next->opcode;
-		       //printf("opx%d",opc);
-		       while( opc != 110){
+		           int opc = current->next->opcode;
+		           //printf("opx%d",opc);
+		           while( opc != 110){
 
-		         current = current->next;
-		         opc = current->opcode;
-			 //printf("%d\t",opc);
-			 
-		       }
-		       
-		     }
+		               current = current->next;
+		               opc = current->opcode;
+			       //printf("%d\t",opc);
+		           }
 		     
-		   }
+		    }
+		}
+		if(operation == 4){ // >
+
+		     if(first > constant){
+
+		 	 interpreter_loop(current,const_array);
+		       
+
+		     }else{
+
+		           int opc = current->next->opcode;
+		           //printf("opx%d",opc);
+		           while( opc != 110){
+
+		                current = current->next;
+		                opc = current->opcode;
+			        //printf("%d\t",opc);
+		            }
+		      
+		     }
+		}
+		     
 		   
-		 }
+		   
+	   }
 		 
-	     }
+       }
 }
