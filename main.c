@@ -9,6 +9,7 @@
 
 typedef struct instruction{
 
+  struct instruction* prev;
   int opcode;
   int pos;
   int snd_pos;
@@ -136,6 +137,15 @@ int main(int argc , char **argv){
      }else if(len == 2 && strcmp(opcode,"65") == 0){ // load name
 
        opcode_arg = 65;
+       hex_str_p = next_byte(hex_str_p, opcode);
+       pos_arg = atoi(opcode);
+       hex_str_p = next_byte(hex_str_p, opcode);
+       snd_pos_arg = atoi(opcode);
+       push_ll(&head, opcode_arg, pos_arg, snd_pos_arg);
+       
+     }else if(len ==2 && strcmp(opcode,"71") == 0){
+
+       opcode_arg =71;
        hex_str_p = next_byte(hex_str_p, opcode);
        pos_arg = atoi(opcode);
        hex_str_p = next_byte(hex_str_p, opcode);

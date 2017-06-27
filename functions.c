@@ -6,7 +6,11 @@
 
 extern int len_const_array;
 extern int *const_array;
+int stack_size;
+
+int stack[200];
 //functions for stack manipulations
+
 
 // push elements to end of array max size of constants array = SIZE.. // use dynamic allocation to make it dynamic
 
@@ -53,20 +57,22 @@ char* strrev(char *str){
 int pop(){
 
   int top;
-  int index = len_const_array -1;
-  top = const_array[index];
-  len_const_array = len_const_array -1;
+  int index = stack_size -1;
+  top = stack[index];
+  stack_size = stack_size -1;
   return top;
   
   
 }
 
+
 void push_stack(int a){
 
   static int len =0;
-  len = len_const_array;
-  const_array[len] = a;
-  len_const_array = len_const_array+1;
+  //len = len_const_array;
+  stack[len] = a;
+  stack_size = len+1;
+  len = len+1;
   
 }
 
@@ -91,7 +97,7 @@ int deter_len(char *opcode){
 
   if(strcmp(opcode,"73") == 0 || strcmp(opcode,"69") == 0) // start
     return 4;
-  else if(strcmp(opcode, "64") == 0 || strcmp(opcode, "5A") == 0 || strcmp(opcode, "65") == 0 || strcmp(opcode,"6B") == 0 || strcmp(opcode, "6E") == 0) //load const, store_name , load_name
+  else if(strcmp(opcode, "64") == 0 || strcmp(opcode, "5A") == 0 || strcmp(opcode, "65") == 0 || strcmp(opcode,"6B") == 0 || strcmp(opcode, "6E") == 0 || strcmp(opcode, "71") == 0) //load const, store_name , load_name
     return 2;
   else if(strcmp(opcode,"17") == 0 || strcmp(opcode,"47") == 0 || strcmp(opcode,"48") == 0 || strcmp(opcode, "53") == 0 || strcmp(opcode,"18") == 0 || strcmp(opcode,"15") == 0 || strcmp(opcode, "14") == 0) //binary_add, print_item, print_new_line
     return 0;
@@ -105,7 +111,7 @@ int deter_len(char *opcode){
 void push_ll(instruction_node **headRef, int opcode, int pos, int snd_pos){ // creates ll on the go
 
   instruction_node *current = *headRef;
-  instruction_node* newNode;
+  instruction_node* newNode, *temp;
   newNode =(instruction_node*)malloc(sizeof(instruction_node));
   if(newNode == NULL){
 
@@ -116,11 +122,15 @@ void push_ll(instruction_node **headRef, int opcode, int pos, int snd_pos){ // c
   newNode->pos = pos;
   newNode->snd_pos = snd_pos;
   newNode->next = NULL;
+  newNode->prev = NULL;
   //printf("%d %d %d\t",opcode,pos,snd_pos);
   
   if(current == NULL){
     
+    newNode->prev = NULL;
     *headRef = newNode;
+    
+    
     
     
   }else{
@@ -128,8 +138,12 @@ void push_ll(instruction_node **headRef, int opcode, int pos, int snd_pos){ // c
       current = current->next;
     }
     
-
-    current->next = newNode;
+    //temp = current;
+     current->next = newNode;
+    newNode->prev = current; // added extra
+   
+   
+    
   }
 }
 
@@ -137,15 +151,18 @@ void push_ll(instruction_node **headRef, int opcode, int pos, int snd_pos){ // c
 // prints the instruction set
 void printll(instruction_node *ll){
   printf("call\t");
-  instruction_node *current;
+  int counter =0;
+  instruction_node *current,*snd;
   for(current = ll;current != NULL; current= current->next){
-
-    // printf("inside ll\t'");
+    counter++;
+    //printf("inside ll\t'");
     printf("\n%d\t",current->opcode);
     printf("%d\t",current->pos);
     printf("%d\n",current->snd_pos);
+    
         
   }
+  
   
 }
 

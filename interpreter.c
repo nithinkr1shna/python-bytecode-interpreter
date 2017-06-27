@@ -1,298 +1,302 @@
 #include<stdio.h>
-#include<string.h>
 #include<stdlib.h>
+#include<string.h>
 #include<math.h>
 #include "include.h"
-#include  "functions.h"
+#include "functions.h"
 
-instruction_node* pointer;
-void loop(void);
-void push_stack(int);
-int pop(void);
-void printll(instruction_node*);
-void interpreter_loop(instruction_node*, int*);
-int push_gen(int, int*);
 extern int len_const_array;
 extern int *const_array;
-//int index_pos =0;
-int const_pos_index=0, name_pos_index =0;
-int count_of_start_end =0;
-char str[5];
-char snd_str[5];
-char thrd_str[5];
-char fourth_str[5];
-int first,second;
-instruction_node *current;
-int if_condition =0;
 
-void start_interpreter(instruction_node* instruction_set, int* constants){
+instruction_node *current;
+int binary_add_flag =0;
+int binary_sub_flag = 0;
+int store_array[256];
+int index_store_array =0;
+int loaded =0;
+int end =0;
+int while_loop_counter=0;
+int trueness_of_loop =0;
   
+void printll(instruction_node*);
+void interpreter_loop(instruction_node*, int*);
+void push_stack(int);
+int pop(void);
+
+void hop_back(int, instruction_node*, int*);
+void start_interpreter(instruction_node *instruction_set, int *constants){
+
   printll(instruction_set);
   interpreter_loop(instruction_set, constants);
 }
 
+void interpreter_loop(instruction_node *instructions, int *constants){
 
+  for(current = instructions; current !=NULL ; current = current->next){
 
-void interpreter_loop( instruction_node* instructions, int *constants){
-
- 
-  
-  //int load_name[256];
-  //int load_const[256]; // used for instruction just above  opcode 6b(if) in instruction set
-  
-  int const_pos[256];
-  int name_pos[256];
-  
-  for(current = instructions; current != NULL; current = current->next){
+    while_loop_counter++;
+    int op = current->opcode;
+    printf("opcode is%d\n", op);
     
    
-    
-    sprintf(str, "%d",current->opcode);
-    if(strcmp(str,"73") == 0){
+    if(op == 65){
+      int val = store_array[current->pos];
+      push_stack(val);
+      printf("\tsnd%d\t",val);
+    }else if(op == 14){ // mul
 
-      count_of_start_end++;
-    }
-    if(count_of_start_end > 1)
-      break;
-    
-
-    if(strcmp(str,"65") == 0){  // 65 00 00
-      if(if_condition)
-	push_stack(const_array[current->pos]);
+      int val1=0,val2=0;
+      val1 = pop();
+      val2 =pop();
+      push_stack(val1*val2);
       
-      first = const_array[current->pos];
-      printf("first one %d",first);
-      sprintf(snd_str,"%d",current->next->opcode);
-      if(strcmp(snd_str,"65") == 0){  // 65 00 00 
-	        if_condition =0;
-         	second = const_array[current->next->pos];
-		printf("snd %d",second);
-	        sprintf(thrd_str, "%d",current->next->next->opcode);
-	        if(strcmp(thrd_str,"17") == 0){  // 17 binary add
+    }else if(op == 18){ // sub
 
-	               int sum = first + second;
-		       printf("sum %d",sum);
-	               push_stack(sum);
-		       current = current->next->next;
+      int top = pop();
+      int top2 = pop();
+      push_stack( top2-top);
+    }else if(op ==17){ // add
+
+      int val =pop();
+      int val2 = pop();
+      printf("values %d %d", val,val2);
+      push_stack(val+val2);
+    }else if(op == 15){ // div
+
+      int val = pop();
+      int val1 = pop();
+      push_stack(val1/val);
+    }else if(op == 47){ // output
+
+      int val = pop();
+      printf("ans is %d\t",val);
+    }else if(op == 71){
+
+      int hops = while_loop_counter;
+      while_loop_counter =0;
+      printf("hops %d",hops);
+    
+	hop_back(hops+2, current, constants);
+      
+    }else if(op == 107){ //if
+      while_loop_counter =0;
+      int val1=0, val2=0;
+      val1 =pop();
+      val2 =pop();
+      int operator = current->pos;
+      printf("val1 %d, val2 %d\t", val1,val2);
+
+      if(operator == 4){ // >
+
+	if(val2 > val1){
+           trueness_of_loop =1;
+	   current =current->next;
+	   printf("4four");
+	   interpreter_loop(current, constants);
 	  
-	        }else if(strcmp(thrd_str, "18") == 0){ //18 subtract
+	}else{
+          
+	  int opcode = current->next->opcode;
+	  if(trueness_of_loop ==1){
 
-		        int diff = first - second;
-		        push_stack(diff);
-			current = current->next->next;
+	    while(opcode !=71){
 
-		}else if(strcmp(thrd_str ,"15") == 0){
-
-		  int quotient = first / second;
-		  push_stack(quotient);
-		  current = current->next->next;
-		  
-		}else if(strcmp(thrd_str, "14") == 0){
-
-		  int product = first * second;
-		  push_stack(product);
-		  current = current->next->next;
-		}
-		
-        }else{
-        
-         	loop();
+	       opcode = current->next->opcode;
+	          current= current->next;
+	    }
+	  }else{
+	    
+	       while(opcode != 110){
+	   
+	          opcode = current->next->opcode;
+	          current= current->next;
+	        }
+	  }
+	}
 	
-       } 
-		
-    }else if(strcmp(str,"47")==0){
-      int x;
-      x = pop();
-      printf("val %d",x);
-    }else if(strcmp(str,"48")==0){
-
-      printf("\n");
-   
-    }else if(strcmp(str,"6E") ==0 || strcmp(str,"28") == 0){
-
-      break;
-    }
       
-  }
-} 
+      }else if(operator = 5){
+	
+	if(val2 >= val1){
+	  trueness_of_loop =1;
+          current = current->next;
+	  printf("5five");
+	  interpreter_loop(current,constants);
+	  
+	}else{
+          int opcode= current->next->opcode;
+	  if(trueness_of_loop ==1){
+	      while(opcode != 71){
 
+	        opcode = current->next->opcode;
+	        current= current->next;
 
-void loop(void){
+	      }
+	  }else{
 
-         
-	 sprintf(snd_str, "%d", current->next->opcode);
-	     if(strcmp(snd_str,"17") == 0){
+		while(opcode != 110){
 
-	       int top = pop();
-	        printf("top %d", top);
-	       int sum = first + top;
-	       printf("last sum %d",sum);
-	       push_stack(sum);
-	       current = current->next;
-	       loop();
-	       
-	     }else if(strcmp(snd_str,"18") == 0){ // subtract
+	        opcode = current->next->opcode;
+	        current= current->next;
+		
+	      }
+	  }
+	}
+      }else if(operator ==3 ){ // !=
 
-	       int top = pop();
-	       printf("top %d", top);
-	       int diff = top-first;
-	       push_stack(diff);
-	       current = current->next;
-	       loop();
-	     }else if(strcmp(snd_str,"15") == 0){
+	if(val2 != val1){
+           trueness_of_loop =1;
+	  current =current->next;
+	  printf("three");
+	  interpreter_loop(current,constants);
+	  
+	}else{
 
-	       int top = pop();
-	       printf("top %d", top);
-	       int quotient = first / top;
-	       push_stack(quotient);
-	       current = current->next;
-	       loop();
-	     }else if(strcmp(snd_str,"14") == 0){
+	   int opcode = current->next->opcode;
+	   if(trueness_of_loop ==1){
+	       while(opcode != 71){
 
-	       int top = pop();
-	       printf("top %d", top);
-	       int product = first * top;
-	       push_stack(product);
-	       current = current->next;
-	       loop();
-	     }else if(strcmp(snd_str,"64") ==0){ // 65 00 00 , 64 00 00 , 107(if)
+	         opcode = current->next->opcode;
+	         current= current->next;
+	  
+	       }
+	   }else{
 
-	         current = current->next;
-		 int constant = const_array[current->pos];
-	         //printf("64 %d", constant);
-		 //printf("opcode %d",current->opcode); // at 64
-		 current = current ->next;
-		 sprintf(thrd_str,"%d",current->opcode);
-		 if(strcmp(thrd_str,"107")==0){
+	     while(opcode != 110){
 
-		   if_condition = 1;
-		   int operation = current->pos;
-		   if(operation == 5){ // >=
-		       //printf("\tval of first %d\t",first);
-		       //printf("\tval of const %d\t",constant);
-		       if(first >= constant){
-
-		             interpreter_loop(current, const_array);
-		       }else{
-
-		             int opc = current->next->opcode;
-		             //printf("opx%d",opc);
-		             while( opc != 110){
-
-		                 current = current->next;
-		                 opc = current->opcode;
-			         //printf("%d\t",opc);
-			 
-		             }
-		       
-		       }
-
-		   }
-		   if(operation == 0){ // <
-
-		       if(first < constant){
-
-		          interpreter_loop(current,const_array);
-		       
-
-		       }else{
-
-		             int opc = current->next->opcode;
-		             //printf("opx%d",opc);
-		             while( opc != 110){
-
-		                  current = current->next;
-		                  opc = current->opcode;
-			          //printf("%d\t",opc);
-		           }
-		     
-		     }
-		   
-		  }
-		  if(operation == 1){ // <=
-
-		       if(first <= constant){
-
-			  interpreter_loop(current,const_array);
-		       
-
-		       }else{
-
-		          int opc = current->next->opcode;
-		          //printf("opx%d",opc);
-		          while( opc != 110){
-
-		                 current = current->next;
-		                 opc = current->opcode;
-			         //printf("%d\t",opc);
-		          }
-		     
-		     }
-		 }
-		 if(operation == 2){ // ==
-
-		       if(first == constant){
-
-		          interpreter_loop(current,const_array);
-		       
-
-		       }else{
-
-		          int opc = current->next->opcode;
-		          //printf("opx%d",opc);
-		          while( opc != 110){
-
-		                  current = current->next;
-		                  opc = current->opcode;
-			          //printf("%d\t",opc);
-		          }
-		     
-		     }
-		}
-		if(operation == 3){ // !=
-
-		     if(first != constant){
-
-			 interpreter_loop(current,const_array);
-		       
-
-		     }else{
-
-		           int opc = current->next->opcode;
-		           //printf("opx%d",opc);
-		           while( opc != 110){
-
-		               current = current->next;
-		               opc = current->opcode;
-			       //printf("%d\t",opc);
-		           }
-		     
-		    }
-		}
-		if(operation == 4){ // >
-
-		     if(first > constant){
-
-		 	 interpreter_loop(current,const_array);
-		       
-
-		     }else{
-
-		           int opc = current->next->opcode;
-		           //printf("opx%d",opc);
-		           while( opc != 110){
-
-		                current = current->next;
-		                opc = current->opcode;
-			        //printf("%d\t",opc);
-		            }
-		      
-		     }
-		}
-		     
-		   
-		   
+	        opcode = current->next->opcode;
+	        current= current->next;
 	   }
-		 
+	
+      }
+
+	}
+      }else if(operator == 2){ // ==
+
+	if(val2 == val1){
+           trueness_of_loop =1;
+	  current = current->next;
+	  printf("two");
+	  interpreter_loop(current, constants);
+	  
+	}else{
+
+	   int opcode = current->next->opcode;
+	   if(trueness_of_loop ==1){
+         	  while(opcode != 71){
+ 
+	             opcode = current->next->opcode;
+	            current= current->next;
+	          }
+	   }else{
+
+	     while(opcode != 110){
+
+	        opcode = current->next->opcode;
+	        current= current->next;
+	   }
+	
+         }
+
+	}
+      }else if(operator == 1){ // <=
+
+	if(val2 <= val1){
+           trueness_of_loop =1;
+	  current = current->next;
+	  printf("one");
+	  interpreter_loop(current, constants);
+	  
+	}else{
+
+	   int opcode = current->next->opcode;
+	   if(trueness_of_loop ==1){
+	      while(opcode != 71){
+
+	        opcode = current->next->opcode;
+	        current= current->next;
+	      }
+	   }else{
+
+	     while(opcode != 110){
+
+	        opcode = current->next->opcode;
+	        current= current->next;
+	      }
+	
+           }
        }
+      }else if(operator == 0){ // <
+
+	if(val2 < val1){
+           trueness_of_loop =1;
+	  current = current->next;
+	  interpreter_loop(current, constants);
+	  
+	}else{
+
+	   int opcode = current->next->opcode;
+	   if(trueness_of_loop == 1){
+	      while(opcode != 71){
+
+	         opcode = current->next->opcode;
+	         current= current->next;
+	      }
+	   }else{
+
+	     while(opcode != 110){
+
+	        opcode = current->next->opcode;
+	        current= current->next;
+	   }
+	}
+      }
+     }
+	
+      
+
+     
+    
+    }else if(op == 90){ //5a store name
+
+      int previous_instr =current->prev->opcode;
+      if( previous_instr== 64){
+           int val = current->prev->pos;
+           store_array[index_store_array] = constants[val];
+	   printf("vals %d",constants[val]);
+	   
+      }else if(previous_instr == 17   || previous_instr == 18){
+
+	    int val = pop();
+	    store_array[current->pos] = val;
+      }
+      index_store_array++;
+    }else if(op == 73){
+        end++;
+        if(end >1){
+	  printf("\nbreakingg....end of prgrm\n");
+	  exit(0);
+	}
+    }
+  
+    
+    
+    
+  } // end of for
+} // end of function interpreter_loop
+
+
+// other functions
+
+void hop_back(int count, instruction_node* addr, int* constants){
+
+  instruction_node* current = addr;
+  while(count >0){
+
+    current = current->prev;
+    count--;
+    
+  }
+  printf("the current value %d", current->opcode);
+  interpreter_loop(current, constants);
 }
