@@ -5,6 +5,7 @@ extern int htod(char* hex);
 typedef struct instruction{
 
   struct instruction* prev;
+  int sr;
   int opcode;
   int pos;
   int snd_pos;

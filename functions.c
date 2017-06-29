@@ -97,7 +97,7 @@ int deter_len(char *opcode){
 
   if(strcmp(opcode,"73") == 0 || strcmp(opcode,"69") == 0) // start
     return 4;
-  else if(strcmp(opcode, "64") == 0 || strcmp(opcode, "5A") == 0 || strcmp(opcode, "65") == 0 || strcmp(opcode,"6B") == 0 || strcmp(opcode, "6E") == 0 || strcmp(opcode, "71") == 0) //load const, store_name , load_name
+  else if(strcmp(opcode, "64") == 0 || strcmp(opcode, "5A") == 0 || strcmp(opcode, "65") == 0 || strcmp(opcode,"6B") == 0 || strcmp(opcode, "6E") == 0 || strcmp(opcode, "71") == 0 || strcmp(opcode,"78") == 0) //load const, store_name , load_name
     return 2;
   else if(strcmp(opcode,"17") == 0 || strcmp(opcode,"47") == 0 || strcmp(opcode,"48") == 0 || strcmp(opcode, "53") == 0 || strcmp(opcode,"18") == 0 || strcmp(opcode,"15") == 0 || strcmp(opcode, "14") == 0) //binary_add, print_item, print_new_line
     return 0;
@@ -108,7 +108,7 @@ int deter_len(char *opcode){
 }
 
 // create instruction set as linked list;
-void push_ll(instruction_node **headRef, int opcode, int pos, int snd_pos){ // creates ll on the go
+void push_ll(instruction_node **headRef, int opcode, int pos, int snd_pos, int sr){ // creates ll on the go
 
   instruction_node *current = *headRef;
   instruction_node* newNode, *temp;
@@ -121,6 +121,7 @@ void push_ll(instruction_node **headRef, int opcode, int pos, int snd_pos){ // c
   newNode->opcode = opcode;
   newNode->pos = pos;
   newNode->snd_pos = snd_pos;
+  newNode->sr = sr;
   newNode->next = NULL;
   newNode->prev = NULL;
   //printf("%d %d %d\t",opcode,pos,snd_pos);
@@ -156,7 +157,8 @@ void printll(instruction_node *ll){
   for(current = ll;current != NULL; current= current->next){
     counter++;
     //printf("inside ll\t'");
-    printf("\n%d\t",current->opcode);
+    printf("\n%d\t", current->sr);
+    printf("%d\t",current->opcode);
     printf("%d\t",current->pos);
     printf("%d\n",current->snd_pos);
     

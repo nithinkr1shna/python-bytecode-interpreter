@@ -6,10 +6,12 @@
 #include "functions.h"
 //#include "opecodes.h"
 #define SIZE 256
+#define MGC_TMSTMP 8
 
 typedef struct instruction{
 
   struct instruction* prev;
+  int sr;
   int opcode;
   int pos;
   int snd_pos;
@@ -35,7 +37,7 @@ int push(int);
 void start_interpreter(instruction_node*, int*);
 int htod(char*);
 void printll(instruction_node*);
-void push_ll(instruction_node**, int, int, int);
+void push_ll(instruction_node**, int, int, int,int);
 int deter_len(char *opcode);
 unsigned char *next_byte(unsigned char*,char *opcode);
 unsigned char *push_ll_wrapper(unsigned char*,instruction_node*, int, char*,int, int, int );
@@ -59,7 +61,8 @@ int main(int argc , char **argv){
   }else{
     FILE *pyc_pointer;
     size_t n;
-    int len,check=0,counter=0,opcode_seventyfour=0;
+    int sr_cnt =0;
+    int len,check=0,counter=0,opcode_seventyfour=0,counter_mgc=MGC_TMSTMP;
     unsigned char buffer[2],hex_str[SIZE*2];
     unsigned char *hex_str_p = hex_str;
     char opcode[3], values[8];
@@ -85,132 +88,165 @@ int main(int argc , char **argv){
     hex_str_p = hex_str;
     printf("\n");
 
-    
+    while(counter_mgc >0){ // skip first eight bytes
+
+      hex_str_p = next_byte(hex_str_p,opcode);
+      counter_mgc--;
+      
+    }
     while(*hex_str_p){ //loop for creating instructions and assosciated data structure
       hex_str_p = next_byte(hex_str_p,opcode);
+     
  
       len =deter_len(opcode); // determining the offset of each instruction
      //printf("len %d\t", len);
      if(len == 4 && strcmp(opcode,"73") ==0 ){
-      
+        sr_cnt++;
        opcode_arg = 73;
        pos_arg =-1;
        snd_pos_arg = -1;
-       push_ll(&head, opcode_arg,pos_arg,snd_pos_arg); 
+       push_ll(&head, opcode_arg,pos_arg,snd_pos_arg,sr_cnt); 
      
 
 
      }else if(len ==2 && strcmp(opcode,"6E") == 0){
 
+       sr_cnt++;
        opcode_arg = htod("6E");
        hex_str_p = next_byte(hex_str_p,opcode);
        pos_arg = atoi(opcode);
        hex_str_p = next_byte(hex_str_p,opcode);
        snd_pos_arg = atoi(opcode);
-       push_ll(&head,opcode_arg, pos_arg, snd_pos_arg);
+       push_ll(&head,opcode_arg, pos_arg, snd_pos_arg,sr_cnt);
        
 
      }else if(len ==2 && strcmp(opcode,"64") == 0){ // 64 load_const   both positions should be
        // converted to a single integer value
-       
+
+        sr_cnt++;
        opcode_arg =64;
        hex_str_p = next_byte(hex_str_p,opcode);
        pos_arg =atoi(opcode);
        hex_str_p = next_byte(hex_str_p,opcode); 
        snd_pos_arg = atoi(opcode);
-       push_ll(&head, opcode_arg,pos_arg,snd_pos_arg);
+       push_ll(&head, opcode_arg,pos_arg,snd_pos_arg,sr_cnt);
       
        
       
      
      }else if(len == 2 && strcmp(opcode,"5A") ==0){ // store name
-       
+
+        sr_cnt++;
        opcode_arg = htod("5A"); // converted 5A as 90 
        hex_str_p = next_byte(hex_str_p,opcode);
        pos_arg = atoi(opcode);
        hex_str_p = next_byte(hex_str_p,opcode);
        snd_pos_arg = atoi(opcode);
-       push_ll(&head,opcode_arg, pos_arg, snd_pos_arg);
+       push_ll(&head,opcode_arg, pos_arg, snd_pos_arg,sr_cnt);
        
 	
        
+     }else if(len == 2 && strcmp(opcode, "78") == 0){
+
+        sr_cnt++;
+       opcode_arg = 78;
+       pos_arg =-1;
+       snd_pos_arg =-1;
+       hex_str_p = next_byte(hex_str_p,opcode);
+       hex_str_p = next_byte(hex_str_p,opcode);
+       
+       push_ll(&head, opcode_arg,pos_arg, snd_pos_arg,sr_cnt);
+       
      }else if(len == 2 && strcmp(opcode,"65") == 0){ // load name
 
+        sr_cnt++;
        opcode_arg = 65;
        hex_str_p = next_byte(hex_str_p, opcode);
        pos_arg = atoi(opcode);
        hex_str_p = next_byte(hex_str_p, opcode);
        snd_pos_arg = atoi(opcode);
-       push_ll(&head, opcode_arg, pos_arg, snd_pos_arg);
+       push_ll(&head, opcode_arg, pos_arg, snd_pos_arg,sr_cnt);
        
      }else if(len ==2 && strcmp(opcode,"71") == 0){
 
+        sr_cnt++;
        opcode_arg =71;
        hex_str_p = next_byte(hex_str_p, opcode);
        pos_arg = atoi(opcode);
        hex_str_p = next_byte(hex_str_p, opcode);
        snd_pos_arg = atoi(opcode);
-       push_ll(&head, opcode_arg, pos_arg, snd_pos_arg);
+       push_ll(&head, opcode_arg, pos_arg, snd_pos_arg,sr_cnt);
        
      }else if(len == 2 && strcmp(opcode,"6B") == 0){  // if
        // the two bytes after  6B is index , make it as a single unit         
+
+        sr_cnt++;
        opcode_arg = htod(opcode);
        hex_str_p = next_byte(hex_str_p, opcode);
        pos_arg = htod(opcode);
        hex_str_p = next_byte(hex_str_p, opcode);
        snd_pos_arg = htod(opcode);
-       push_ll(&head,opcode_arg,pos_arg,snd_pos_arg); 
+       push_ll(&head,opcode_arg,pos_arg,snd_pos_arg,sr_cnt); 
        
      }else if(len ==0 && strcmp(opcode,"17") == 0){ // binary add
 
+        sr_cnt++;
        opcode_arg =17;
        pos_arg =-1;
        snd_pos_arg =-1;
-       push_ll(&head,opcode_arg,pos_arg,snd_pos_arg);
+       push_ll(&head,opcode_arg,pos_arg,snd_pos_arg,sr_cnt);
        
      }else if(len ==0  && strcmp(opcode,"18") == 0){ // sub
 
+        sr_cnt++;
        opcode_arg = 18;
        pos_arg =-1;
        snd_pos_arg =-1;
-       push_ll(&head,opcode_arg,pos_arg,snd_pos_arg);
+       push_ll(&head,opcode_arg,pos_arg,snd_pos_arg,sr_cnt);
        
      }else if(len ==0 && strcmp(opcode,"15") == 0){ //div
 
+        sr_cnt++;
        opcode_arg =15;
        pos_arg =-1;
        snd_pos_arg =-1;
-       push_ll(&head,opcode_arg,pos_arg,snd_pos_arg);
+       push_ll(&head,opcode_arg,pos_arg,snd_pos_arg,sr_cnt);
        
      }else if(len == 0 && strcmp(opcode,"14") ==0){ // mul
 
+        sr_cnt++;
        opcode_arg =14;
         pos_arg =-1;
        snd_pos_arg =-1;
-       push_ll(&head,opcode_arg,pos_arg,snd_pos_arg);
+       push_ll(&head,opcode_arg,pos_arg,snd_pos_arg,sr_cnt);
        
      }else if(len ==0 && strcmp(opcode,"47") == 0){ //print
 
+        sr_cnt++;
        opcode_arg =47;
        pos_arg =-1;
        snd_pos_arg =-1;
-       push_ll(&head, opcode_arg, pos_arg, snd_pos_arg);
+       push_ll(&head, opcode_arg, pos_arg, snd_pos_arg,sr_cnt);
        
      }else if(len == 0 && strcmp(opcode,"48") == 0){ //print new line
 
+        sr_cnt++;
        opcode_arg =48;
        pos_arg = -1;
        snd_pos_arg = -1;
-       push_ll(&head, opcode_arg, pos_arg, snd_pos_arg);
+       push_ll(&head, opcode_arg, pos_arg, snd_pos_arg,sr_cnt);
        
      }else if(len == 0 && strcmp(opcode,"53") == 0){ // return 
 
+        sr_cnt++;
        opcode_arg = 53;
        pos_arg= -1;
        snd_pos_arg = -1;
-       push_ll(&head, opcode_arg, pos_arg, snd_pos_arg);
+       push_ll(&head, opcode_arg, pos_arg, snd_pos_arg,sr_cnt);
        
-     }else if(len == 4 && strcmp(opcode,"74") == 0){ 
+     }else if(len == 4 && strcmp(opcode,"74") == 0){
+       
+        sr_cnt++;
        opcode_seventyfour = opcode_seventyfour +1;
        opcode_arg = 74;
        hex_str_p = next_byte(hex_str_p, opcode);
@@ -221,7 +257,7 @@ int main(int argc , char **argv){
        hex_str_p = next_byte(hex_str_p,opcode);
        snd_pos_arg =-1;
        hex_str_p = create_var_array(opcode,counter_pos_arg,hex_str_p,opcode_seventyfour);
-       push_ll(&head, opcode_arg, pos_arg, snd_pos_arg);
+       push_ll(&head, opcode_arg, pos_arg, snd_pos_arg,sr_cnt);
        
      }else if(len == 4 && strcmp(opcode, "69") ==0 ){  //store constants / load attribs
        
@@ -234,11 +270,11 @@ int main(int argc , char **argv){
 	   strcat(values,strrev(opcode));
 	 //printf("%s",opcode);
        }
-       printf("%s\t",strrev(values));
-       printf("%d", htod(strrev(values))); 
+	//printf("%s\t",strrev(values));
+       printf("%d\t", htod(strrev(values))); 
        //push value to array;
        len_const_array = push(htod(strrev(values))); // pudhing to array of contants ..   ****
-       printf("const_array_len:%d",len_const_array); 
+       //printf("const_array_len:%d",len_const_array); 
      }
     }
     
