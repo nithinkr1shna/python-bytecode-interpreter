@@ -199,7 +199,7 @@ int condition_if(int pos, int *instructions, int *constants,int status){
         printf("total hops %d\n",hop+pos);
         return hop+pos;
       }else{
-        while(instructions[pos] != condition){
+        while(instructions[pos] != 72){
           printf("in skip\n");
 
           pos++;
@@ -221,7 +221,7 @@ int condition_if(int pos, int *instructions, int *constants,int status){
         printf("total hops %d\n",hop+pos-9);
         return hop+(pos-9);
       }else{
-        while(instructions[pos] != condition){
+        while(instructions[pos] != 72){
           printf("in skip\n");
 
           pos++;
@@ -242,7 +242,7 @@ int condition_if(int pos, int *instructions, int *constants,int status){
         printf("total hops %d\n",hop+pos);
         return hop+pos;
       }else{
-        while(instructions[pos] != condition){
+        while(instructions[pos] != 72){
           printf("in skip\n");
 
           pos++;
@@ -263,7 +263,7 @@ int condition_if(int pos, int *instructions, int *constants,int status){
         printf("total hops %d\n",hop+pos);
         return hop+pos;
       }else{
-        while(instructions[pos] != condition){
+        while(instructions[pos] != 72){
           printf("in skip\n");
 
           pos++;
@@ -285,7 +285,7 @@ int condition_if(int pos, int *instructions, int *constants,int status){
         printf("total hops %d\n",hop+pos);
         return hop+pos;
       }else{
-        while(instructions[pos] != condition){
+        while(instructions[pos] != 72){
           printf("in skip\n");
 
           pos++;
@@ -306,7 +306,7 @@ int condition_if(int pos, int *instructions, int *constants,int status){
         printf("total hops %d\n",hop+pos);
         return hop+pos;
       }else{
-        while(instructions[pos] != condition){
+        while(instructions[pos] != 72){
           printf("in skip\n");
 
           pos++;
