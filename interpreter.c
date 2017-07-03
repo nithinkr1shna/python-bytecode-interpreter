@@ -6,350 +6,328 @@
 #include "functions.h"
 
 extern int len_const_array;
-extern int *const_array;
+//extern int *const_array;
+//extern int *instruction_array;
+extern int lenofinstr;
 
-instruction_node *current;
-int binary_add_flag =0;
-int binary_sub_flag = 0;
+
+
 int store_array[256];
-int index_store_array =0;
-int loaded =0;
-int end =0;
-int while_loop_counter=0;
-int trueness_of_loop =0;
-int while_loop =0;
-int if_counter =0;
-int while_if =1;
-int sr_at_while=0, sr_at_end =0;
+int store_array_index=0;
+int status =0;
+int condition;
 
-void printll(instruction_node*);
-void interpreter_loop(instruction_node*, int*);
+int  push_w(int, int, int*, int*);
+int  pop_w(int, int, int*, int*);
+void interpreter_loop(int*, int*);
 void push_stack(int);
 int pop(void);
+int sum(int, int);
+int sub(int , int);
+int mul(int , int);
+int divi(int, int);
+int  condition_if(int, int*,int*, int);
+int while_loop(int, int*, int*,int);
 
-void hop_back(int, instruction_node*, int*);
+void start_interpreter(int *instruction_array, int *const_array){
 
-void start_interpreter(instruction_node *instruction_set, int *constants){
-
-  printll(instruction_set);
-  interpreter_loop(instruction_set, constants);
+  interpreter_loop(instruction_array, const_array);
  
 }
 
-void interpreter_loop(instruction_node *instructions, int *constants){
+void interpreter_loop(int *instructions, int *constants){
 
-  for(current = instructions; current !=NULL ; current = current->next){
+  int i,opc;
+  for(i=0;i<lenofinstr;i++){
 
-   
-    while_loop_counter++;
-
-    int op = current->opcode;
-    int serial = current->sr;
-    //printf("serial is %d opcode is%d\n", serial,op);
-       
-    if(op == 65){
-      int val = store_array[current->pos];
-      push_stack(val);
-      //printf("\tsnd%d\t",val);
-    }else if(op == 14){ // mul
-
-      int val1=0,val2=0;
-      val1 = pop();
-      val2 =pop();
-      push_stack(val1*val2);
-      
-    }else if(op == 18){ // sub
-
-      int top = pop();
-      int top2 = pop();
-      push_stack( top2-top);
-
-    }else if(op ==17){ // add
-
-      int val =pop();
-      int val2 = pop();
-      // printf("values %d %d", val,val2);
-      push_stack(val+val2);
-    }else if(op == 15){ // div
-
-      int val = pop();
-      int val1 = pop();
-      push_stack(val1/val);
-    }else if(op == 47){ // output
-
-      int val = pop();
-      printf("ans is %d\t",val);
-    }else if(op == 78){
-
-      instruction_node * addr = current;
-      while(current->opcode != 107){
-
-	current  = current->next;
-      }
-      sr_at_while = current->sr;
-      current = addr;
-       printf("sr at while %d" ,sr_at_while);
-      
-      
-    }else if(op == 71){
-
-      //int hops = while_loop_counter;
-      //while_if =0;
-      //while_loop_counter =0;
-      int hops;
-      sr_at_end = current->sr;
-      hops = sr_at_end - sr_at_while;
-      printf("hops %d jump is occuring\n",hops);
-    
-      hop_back(hops+2, current, constants);
-      
-    }else if(op == 107){ //if
-
-      while_loop_counter =0;
-      int val1=0, val2=0;
-      val1 =pop();
-      val2 =pop();
-      int operator = current->pos;
-      printf("val1 %d, val2 %d\t", val1,val2);
-
-      if(operator == 4){ // >
-
-	if(val2 > val1 ){
-           trueness_of_loop =1;
-	   current =current->next;
-	   //printf("current->pos%d",current->opcode);
-	   //printf("4four");
-	   interpreter_loop(current, constants);
-	  
-	}else{
-          
-	  int opcode = current->next->opcode;
-	  if(trueness_of_loop ==1){
-
-	    while(opcode !=71){
-	      // printf("71 in action >");
-	       opcode = current->next->opcode;
-	          current= current->next;
-	    }
-	  }else{
-	    
-	       while(opcode != 110){
-	   
-	          opcode = current->next->opcode;
-	          current= current->next;
-	        }
-	  }
-	}
-	
-      
-      }else if(operator == 0){ // <
-
-	if(val2 < val1){
-           trueness_of_loop =1;
-	  current = current->next;
-	  interpreter_loop(current, constants);
-	  
-	}else{
-
-	   int opcode = current->next->opcode;
-	   if(trueness_of_loop == 1){
-	      while(opcode != 71){
-
-	         opcode = current->next->opcode;
-	         current= current->next;
-	      }
-	   }else{
-
-	     while(opcode != 110){
-
-	        opcode = current->next->opcode;
-	        current= current->next;
-	   }
-	}
-      }
-     }else if(operator = 5){
-	
-	if(val2 >= val1){
-	  trueness_of_loop =1;
-          current = current->next;
-	  printf("5five");
-	  interpreter_loop(current,constants);
-	  
-	}else{
-          int opcode= current->next->opcode;
-	  if(trueness_of_loop ==1){
-	      while(opcode != 71){
-
-	          opcode = current->next->opcode;
-	          current= current->next;
-
-	      }
-	  }else{
-
-		while(opcode != 110){
-
-	        opcode = current->next->opcode;
-	        current= current->next;
-		
-	      }
-	  }
-	}
-      }else if(operator ==3 ){ // !=
-
-	if(val2 != val1){
-          trueness_of_loop =1;
-	  current =current->next;
-	  printf("three");
-	  interpreter_loop(current,constants);
-	  
-	}else{
-
-	   int opcode = current->next->opcode;
-	   if(trueness_of_loop ==1){
-	       while(opcode != 71){
-
-	         opcode = current->next->opcode;
-	         current= current->next;
-	  
-	       }
-	   }else{
-
-	     while(opcode != 110){
-
-	        opcode = current->next->opcode;
-	        current= current->next;
-	   }
-	
-      }
-
-	}
-      }else if(operator == 2){ // ==
-
-	if(val2 == val1){
-          trueness_of_loop =1;
-	  current = current->next;
-	  printf("two");
-	  interpreter_loop(current, constants);
-	  
-	}else{
-
-	   int opcode = current->next->opcode;
-	   if(trueness_of_loop ==1){
-         	  while(opcode != 71){
- 
-	             opcode = current->next->opcode;
-	            current= current->next;
-	          }
-	   }else{
-
-	     while(opcode != 110){
-
-	        opcode = current->next->opcode;
-	        current= current->next;
-	   }
-	
-         }
-
-	}
-      }else if(operator == 1){ // <=
-
-	if(val2 <= val1){
-           trueness_of_loop =1;
-	  current = current->next;
-	  printf("one");
-	  interpreter_loop(current, constants);
-	  
-	}else{
-
-	   int opcode = current->next->opcode;
-	   if(trueness_of_loop ==1){
-	      while(opcode != 71){
-
-	        opcode = current->next->opcode;
-	        current= current->next;
-	      }
-	   }else{
-
-	     while(opcode != 110){
-
-	        opcode = current->next->opcode;
-	        current= current->next;
-	      }
-	
-           }
-       }
-      }/*else if(operator == 0){ // <
-
-	if(val2 < val1){
-           trueness_of_loop =1;
-	  current = current->next;
-	  interpreter_loop(current, constants);
-	  
-	}else{
-
-	   int opcode = current->next->opcode;
-	   if(trueness_of_loop == 1){
-	      while(opcode != 71){
-
-	         opcode = current->next->opcode;
-	         current= current->next;
-	      }
-	   }else{
-
-	     while(opcode != 110){
-
-	        opcode = current->next->opcode;
-	        current= current->next;
-	   }
-	}
-      }
-      } */
-	
-      
-
-     
-    
-    }else if(op == 90){ //5a store name
-
-      int previous_instr =current->prev->opcode;
-      if( previous_instr== 64){
-          
-           int  val = current->prev->pos;
-           store_array[index_store_array] = constants[val];
-	   // printf("vals %d\t",constants[val]);
-	   
-      }else if(previous_instr == 17   || previous_instr == 18){
-
-	    int val = pop();
-	    store_array[current->pos] = val;
-      }
-      index_store_array++;
-    }else if(op == 73){
-        end++;
-        if(end >1){
-	  printf("\nbreakingg....end of prgrm\n");
-	  exit(0);
-	}
-    }
+    printf("opc %d\t",instructions[i]);
+    opc = instructions[i];
+    switch(opc){
   
-    
-    
-    
-  } // end of for
-} // end of function interpreter_loop
-
-
-// other functions
-
-void hop_back(int count, instruction_node* addr, int* constants){
-
-  instruction_node* current = addr;
-  while(count >0){
-
-    current = current->prev;
-    count--;
-    
+    case 100: //64
+      i= push_w(opc,i,instructions, constants);
+      printf("i %d\t",i);
+      break;
+    case 90: //5a
+      i=pop_w(opc,i,instructions,constants);
+      break;
+    case 101: //65
+      i= pop_w(opc,i,instructions,store_array);
+      break;
+    case 20: //14 mul
+      pop_w(opc,i,instructions,store_array);
+      break;
+    case 21: // 15 div
+      pop_w(opc,i,instructions,store_array);
+      break;
+    case 23: //17 sum
+      pop_w(opc,i,instructions,store_array);
+      break;
+    case 24: // 18 sub
+      pop_w(opc,i,instructions,store_array);
+      break;
+    case 107: //6b if
+      printf("in if\n");
+      i = condition_if(i,instructions,store_array,status);
+      break;
+    case 113: //71 absolute jump while loop
+      // jump hence present while loop
+      printf("jump addr %d\n",instructions[i+1]);
+      i=while_loop(i,instructions,store_array,status);    
+      break;
+    case 71: //47 print
+      printf("\nans is %d\n",pop());
+      break;
+    }
   }
-  printf("the current value %d", current->opcode);
-  interpreter_loop(current, constants);
+ }
+
+
+int  push_w(int ins, int pos, int* instructions, int* constants){
+
+  int args =0;
+  if(ins =100) // 64
+    args =2;
+
+  if(args ==2){
+
+
+    push_stack(constants[instructions[pos+1]]);
+    pos =pos+2;
+  }
+
+  return pos;
+  
+}
+
+
+int pop_w(int ins, int pos, int* instructions, int *constants){
+
+
+  if(ins ==90){ // store array
+    int val=0,next;
+    val =pop();
+    next = instructions[pos+1];
+    store_array[next] = val;
+    pos = pos+2;
+   
+    
+  }else if(ins ==101){ // 65 load 
+
+    int val =0,next;
+    next=instructions[pos+1];
+    push_stack(store_array[next]);
+    printf("loading : %d %d\n",next,store_array[next]);
+    pos=pos+2;
+    
+  }else if(ins == 23){ // 17 sum
+
+    int bottom =0, top=0;
+    top =pop();
+    bottom =pop();
+    push_stack(sum(top,bottom));
+    
+  }else if(ins ==24){ // 18 sub;
+    int bottom=0,top=0;
+    top=pop();
+    bottom=pop();
+    push_stack(sub(bottom,top));
+
+  }else if(ins == 20){ // 14 mul
+
+    int bottom =0,top=0;
+    top=pop();
+    bottom = pop();
+    push_stack(mul(top,bottom));
+  }else if(ins == 21){ // 15 div
+
+    int top=0,bottom =0;
+    top=pop();
+    bottom =pop();
+    push_stack(divi(bottom,top));
+  }
+   return pos;
+}
+
+
+
+
+
+// basic arithmatic functions
+
+int sum(int a, int b){
+  printf("the sum is %d\n",a+b);
+  return a+b;
+  
+}
+
+int sub(int a, int b){
+
+  return a-b;
+}
+
+int mul(int a, int b){
+
+  return a*b;
+}
+
+int divi(int a, int b){
+
+  return a/b;
+}
+
+
+//other fns
+
+int condition_if(int pos, int *instructions, int *constants,int status){
+
+  int operator, top=0,bottom =0,pos1;
+  operator = instructions[pos+1];
+  top=pop();
+  bottom =pop(); //first
+  printf("tb %d %d %d %d\n",bottom, top,pos,pos-9);
+  switch(operator){
+
+  case 0: //<
+    if(bottom < top){
+      pos = pos+2;
+    }else{
+
+      if(instructions[pos-9] == 120){ // 78 while
+        int hop = instructions[pos-8];
+	printf("positions hop: %d pos :%d\n",hop,pos);
+        printf("total hops %d\n",hop+pos);
+        return hop+pos;
+      }else{
+        while(instructions[pos] != condition){
+          printf("in skip\n");
+
+          pos++;
+        }
+      }
+   
+  }
+    break;
+  case 4: // >
+    printf("grtr than bottom: %d top : %d\n",bottom,top);
+    if(bottom > top ){
+      pos = pos+2;
+     
+    }else{
+
+      if(instructions[pos-9] == 120){ // 78 while
+        int hop = instructions[pos-8];
+        printf("positions hop: %d pos :%d\n",hop,pos-9);
+        printf("total hops %d\n",hop+pos-9);
+        return hop+(pos-9);
+      }else{
+        while(instructions[pos] != condition){
+          printf("in skip\n");
+
+          pos++;
+        }
+      }
+   
+  }
+  break;
+  case 1: //<=
+    if(bottom <= top){
+
+      pos =pos+2;
+    }else{
+
+      if(instructions[pos-9] == 120){ // 78 while
+        int hop = instructions[pos-8];
+        printf("heyyaaaaaaa");
+        printf("total hops %d\n",hop+pos);
+        return hop+pos;
+      }else{
+        while(instructions[pos] != condition){
+          printf("in skip\n");
+
+          pos++;
+        }
+      }
+   
+  }
+    break;
+  case 2: // ==
+    if(bottom == top){
+
+      pos =pos+2;
+    }else{
+
+      if(instructions[pos-9] == 120){ // 78 while
+        int hop = instructions[pos-8];
+        printf("heyyaaaaaaa");
+        printf("total hops %d\n",hop+pos);
+        return hop+pos;
+      }else{
+        while(instructions[pos] != condition){
+          printf("in skip\n");
+
+          pos++;
+        }
+      }
+   
+  }
+    break;
+  case 3: // !=
+    printf("not el to");
+    if(bottom != top){
+
+      pos = pos+2;
+    }else{
+
+      if(instructions[pos-9] == 120){ // 78 while
+        int hop = instructions[pos-8];
+        printf("heyyaaaaaaa");
+        printf("total hops %d\n",hop+pos);
+        return hop+pos;
+      }else{
+        while(instructions[pos] != condition){
+          printf("in skip\n");
+
+          pos++;
+        }
+      }
+   
+  }
+    break;
+  case 5: //>=
+    if(bottom >= top){
+
+      pos =pos+2;
+    }else{
+
+      if(instructions[pos-9] == 120){ // 78 while
+        int hop = instructions[pos-8];
+        printf("heyyaaaaaaa");
+        printf("total hops %d\n",hop+pos);
+        return hop+pos;
+      }else{
+        while(instructions[pos] != condition){
+          printf("in skip\n");
+
+          pos++;
+        }
+      }
+   
+  }
+    break;
+  default:
+    printf("in defaut\n");
+    
+  } 
+  return pos;
+}
+
+
+int while_loop(int pos, int* instructions, int *constants,int status){
+
+  int next;
+  next = instructions[pos+1];
+  pos = next;
+  
+  return pos-1;
 }

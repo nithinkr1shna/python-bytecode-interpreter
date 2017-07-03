@@ -69,12 +69,17 @@ int pop(){
 void push_stack(int a){
 
   static int len =0;
+  int i;
   //len = len_const_array;
   stack[len] = a;
   stack_size = len+1;
   len = len+1;
+ 
+  
   
 }
+
+
 
 // functions for creating instruction set
 
@@ -95,18 +100,18 @@ unsigned char *next_byte(unsigned char *hex_str_p, char *opcode){
 
 int deter_len(char *opcode){
 
-  if(strcmp(opcode,"73") == 0 || strcmp(opcode,"69") == 0) // start
+  if(strcmp(opcode,"69") == 0) // start
     return 4;
-  else if(strcmp(opcode, "64") == 0 || strcmp(opcode, "5A") == 0 || strcmp(opcode, "65") == 0 || strcmp(opcode,"6B") == 0 || strcmp(opcode, "6E") == 0 || strcmp(opcode, "71") == 0 || strcmp(opcode,"78") == 0) //load const, store_name , load_name
+  else if(strcmp(opcode, "64") == 0 || strcmp(opcode, "5A") == 0 || strcmp(opcode, "65") == 0 || strcmp(opcode,"6B") == 0 || strcmp(opcode, "6E") == 0 || strcmp(opcode, "71") == 0 || strcmp(opcode,"78") == 0 || strcmp(opcode,"74") == 0)
+    //load const, store_name , load_name
     return 2;
-  else if(strcmp(opcode,"17") == 0 || strcmp(opcode,"47") == 0 || strcmp(opcode,"48") == 0 || strcmp(opcode, "53") == 0 || strcmp(opcode,"18") == 0 || strcmp(opcode,"15") == 0 || strcmp(opcode, "14") == 0) //binary_add, print_item, print_new_line
+  else if(strcmp(opcode,"17") == 0 || strcmp(opcode,"47") == 0 || strcmp(opcode,"48") == 0 || strcmp(opcode, "53") == 0 || strcmp(opcode,"18") == 0 || strcmp(opcode,"15") == 0 || strcmp(opcode, "14") == 0 || strcmp(opcode, "00") ==0 || strcmp(opcode, "01") ==0 || strcmp(opcode, "02") ==0 || strcmp(opcode, "02") ==0  || strcmp(opcode,"03")==0 || strcmp(opcode,"04")==0 || strcmp(opcode,"05")==0 || strcmp(opcode,"06") ==0 || strcmp(opcode,"07") ==0 || strcmp(opcode,"08") ==0 || strcmp(opcode,"09") ==0 || strcmp(opcode,"40") ==0) 
     return 0;
-  else if(strcmp(opcode,"74") == 0)
-    return 4;
   else
     return -1;
 }
 
+/*
 // create instruction set as linked list;
 void push_ll(instruction_node **headRef, int opcode, int pos, int snd_pos, int sr){ // creates ll on the go
 
@@ -188,3 +193,4 @@ int push_gen(int a, int* array){
   return k;
     
 }
+*/

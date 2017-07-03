@@ -8,22 +8,12 @@
 #define SIZE 256
 #define MGC_TMSTMP 8
 
-typedef struct instruction{
 
-  struct instruction* prev;
-  int sr;
-  int opcode;
-  int pos;
-  int snd_pos;
-  struct instruction* next;
-  
-}instruction_node;
-
-
-instruction_node *head = NULL;
 
 int *const_array;
 int *name_array;
+int instruction_array[SIZE *8];
+int lenofinstr=0;
 
 //int const_array_pos[SIZE];
 
@@ -34,13 +24,10 @@ char *var_array[SIZE];
 // external functions
 
 int push(int);
-void start_interpreter(instruction_node*, int*);
+void start_interpreter(int*, int*);
 int htod(char*);
-void printll(instruction_node*);
-void push_ll(instruction_node**, int, int, int,int);
-int deter_len(char *opcode);
 unsigned char *next_byte(unsigned char*,char *opcode);
-unsigned char *push_ll_wrapper(unsigned char*,instruction_node*, int, char*,int, int, int );
+
 
 //-----------------------------------------
 
@@ -61,13 +48,13 @@ int main(int argc , char **argv){
   }else{
     FILE *pyc_pointer;
     size_t n;
-    int sr_cnt =0;
+    int start=0;
     int len,check=0,counter=0,opcode_seventyfour=0,counter_mgc=MGC_TMSTMP;
-    unsigned char buffer[2],hex_str[SIZE*2];
+    unsigned char buffer[2],hex_str[SIZE*8];
     unsigned char *hex_str_p = hex_str;
-    char opcode[3], values[8];
-    int counter_pos_arg = 0,j;
-    int opcode_arg,pos_arg,snd_pos_arg;
+    char opcode[3], values[8],magic[8],values1[8];
+    
+    int i,j;
     pyc_pointer = fopen(argv[1],"rb");
     //printf("%s",argv[1]);
     if(pyc_pointer){
@@ -88,233 +75,97 @@ int main(int argc , char **argv){
     hex_str_p = hex_str;
     printf("\n");
 
-    while(counter_mgc >0){ // skip first eight bytes
 
-      hex_str_p = next_byte(hex_str_p,opcode);
-      counter_mgc--;
-      
-    }
-    while(*hex_str_p){ //loop for creating instructions and assosciated data structure
-      hex_str_p = next_byte(hex_str_p,opcode);
-     
- 
-      len =deter_len(opcode); // determining the offset of each instruction
-     //printf("len %d\t", len);
-     if(len == 4 && strcmp(opcode,"73") ==0 ){
-        sr_cnt++;
-       opcode_arg = 73;
-       pos_arg =-1;
-       snd_pos_arg = -1;
-       push_ll(&head, opcode_arg,pos_arg,snd_pos_arg,sr_cnt); 
-     
-
-
-     }else if(len ==2 && strcmp(opcode,"6E") == 0){
-
-       sr_cnt++;
-       opcode_arg = htod("6E");
-       hex_str_p = next_byte(hex_str_p,opcode);
-       pos_arg = atoi(opcode);
-       hex_str_p = next_byte(hex_str_p,opcode);
-       snd_pos_arg = atoi(opcode);
-       push_ll(&head,opcode_arg, pos_arg, snd_pos_arg,sr_cnt);
-       
-
-     }else if(len ==2 && strcmp(opcode,"64") == 0){ // 64 load_const   both positions should be
-       // converted to a single integer value
-
-        sr_cnt++;
-       opcode_arg =64;
-       hex_str_p = next_byte(hex_str_p,opcode);
-       pos_arg =atoi(opcode);
-       hex_str_p = next_byte(hex_str_p,opcode); 
-       snd_pos_arg = atoi(opcode);
-       push_ll(&head, opcode_arg,pos_arg,snd_pos_arg,sr_cnt);
-      
-       
-      
-     
-     }else if(len == 2 && strcmp(opcode,"5A") ==0){ // store name
-
-        sr_cnt++;
-       opcode_arg = htod("5A"); // converted 5A as 90 
-       hex_str_p = next_byte(hex_str_p,opcode);
-       pos_arg = atoi(opcode);
-       hex_str_p = next_byte(hex_str_p,opcode);
-       snd_pos_arg = atoi(opcode);
-       push_ll(&head,opcode_arg, pos_arg, snd_pos_arg,sr_cnt);
-       
+    
+   //copying magic and timestamp to string magic 
+   i =counter_mgc;
+   while(i>0){
 	
-       
-     }else if(len == 2 && strcmp(opcode, "78") == 0){
+     hex_str_p = next_byte(hex_str_p,opcode);
+     if(i==counter_mgc)
+	strcpy(magic,opcode);
+     else
+	strcat(magic,opcode);
+	    
+     i--;
+   }
 
-        sr_cnt++;
-       opcode_arg = 78;
-       pos_arg =-1;
-       snd_pos_arg =-1;
-       hex_str_p = next_byte(hex_str_p,opcode);
-       hex_str_p = next_byte(hex_str_p,opcode);
-       
-       push_ll(&head, opcode_arg,pos_arg, snd_pos_arg,sr_cnt);
-       
-     }else if(len == 2 && strcmp(opcode,"65") == 0){ // load name
+   
+   //skipping mainfun attributes;
+   i=16;
+   while(i>0){
 
-        sr_cnt++;
-       opcode_arg = 65;
-       hex_str_p = next_byte(hex_str_p, opcode);
-       pos_arg = atoi(opcode);
-       hex_str_p = next_byte(hex_str_p, opcode);
-       snd_pos_arg = atoi(opcode);
-       push_ll(&head, opcode_arg, pos_arg, snd_pos_arg,sr_cnt);
-       
-     }else if(len ==2 && strcmp(opcode,"71") == 0){
+     hex_str_p = next_byte(hex_str_p,opcode);
+     i--;
+	
+   }
 
-        sr_cnt++;
-       opcode_arg =71;
-       hex_str_p = next_byte(hex_str_p, opcode);
-       pos_arg = atoi(opcode);
-       hex_str_p = next_byte(hex_str_p, opcode);
-       snd_pos_arg = atoi(opcode);
-       push_ll(&head, opcode_arg, pos_arg, snd_pos_arg,sr_cnt);
-       
-     }else if(len == 2 && strcmp(opcode,"6B") == 0){  // if
-       // the two bytes after  6B is index , make it as a single unit         
+   hex_str_p = next_byte(hex_str_p,opcode);
+   hex_str_p = next_byte(hex_str_p,opcode);
+	
+   printf("opcode%s\n",opcode);
+   if(strcmp(opcode,"73")==0 && start==0){
+      start =1;
+      //get next 4 bytes = length of incstructions.
+      for(i=4;i>0;i--){
 
-        sr_cnt++;
-       opcode_arg = htod(opcode);
-       hex_str_p = next_byte(hex_str_p, opcode);
-       pos_arg = htod(opcode);
-       hex_str_p = next_byte(hex_str_p, opcode);
-       snd_pos_arg = htod(opcode);
-       push_ll(&head,opcode_arg,pos_arg,snd_pos_arg,sr_cnt); 
-       
-     }else if(len ==0 && strcmp(opcode,"17") == 0){ // binary add
+	hex_str_p = next_byte(hex_str_p,opcode);
+	if(i==4)
+	   strcpy(values,strrev(opcode));
+	else
+	   strcat(values,strrev(opcode));
+      }
 
-        sr_cnt++;
-       opcode_arg =17;
-       pos_arg =-1;
-       snd_pos_arg =-1;
-       push_ll(&head,opcode_arg,pos_arg,snd_pos_arg,sr_cnt);
-       
-     }else if(len ==0  && strcmp(opcode,"18") == 0){ // sub
+   } 
+      
+   //printf("in strng%s\t",values);
+   lenofinstr = htod(strrev(values));
+   printf("length of inst %d\n",lenofinstr);
 
-        sr_cnt++;
-       opcode_arg = 18;
-       pos_arg =-1;
-       snd_pos_arg =-1;
-       push_ll(&head,opcode_arg,pos_arg,snd_pos_arg,sr_cnt);
-       
-     }else if(len ==0 && strcmp(opcode,"15") == 0){ //div
+   i=0;
+   j=0;
+   while(*hex_str_p){
 
-        sr_cnt++;
-       opcode_arg =15;
-       pos_arg =-1;
-       snd_pos_arg =-1;
-       push_ll(&head,opcode_arg,pos_arg,snd_pos_arg,sr_cnt);
-       
-     }else if(len == 0 && strcmp(opcode,"14") ==0){ // mul
+     
+    
+      
+      hex_str_p = next_byte(hex_str_p,opcode);
+      printf("%s\t",opcode);
+      
+      
+      if(i<lenofinstr){
+	instruction_array[i] = htod(opcode);
+	printf("%d \t%d\n",htod(opcode),i);
 
-        sr_cnt++;
-       opcode_arg =14;
-        pos_arg =-1;
-       snd_pos_arg =-1;
-       push_ll(&head,opcode_arg,pos_arg,snd_pos_arg,sr_cnt);
-       
-     }else if(len ==0 && strcmp(opcode,"47") == 0){ //print
+      }else if(strcmp(opcode,"69")==0){
 
-        sr_cnt++;
-       opcode_arg =47;
-       pos_arg =-1;
-       snd_pos_arg =-1;
-       push_ll(&head, opcode_arg, pos_arg, snd_pos_arg,sr_cnt);
-       
-     }else if(len == 0 && strcmp(opcode,"48") == 0){ //print new line
-
-        sr_cnt++;
-       opcode_arg =48;
-       pos_arg = -1;
-       snd_pos_arg = -1;
-       push_ll(&head, opcode_arg, pos_arg, snd_pos_arg,sr_cnt);
-       
-     }else if(len == 0 && strcmp(opcode,"53") == 0){ // return 
-
-        sr_cnt++;
-       opcode_arg = 53;
-       pos_arg= -1;
-       snd_pos_arg = -1;
-       push_ll(&head, opcode_arg, pos_arg, snd_pos_arg,sr_cnt);
-       
-     }else if(len == 4 && strcmp(opcode,"74") == 0){
-       
-        sr_cnt++;
-       opcode_seventyfour = opcode_seventyfour +1;
-       opcode_arg = 74;
-       hex_str_p = next_byte(hex_str_p, opcode);
-       pos_arg = atoi(opcode); //count of characters in the variable // use hextod
-       counter_pos_arg = pos_arg; // count of characters in varaible set to counter
-       hex_str_p = next_byte(hex_str_p,opcode); //skipped extra 3 bytes which defines the length of the variable.
-       hex_str_p = next_byte(hex_str_p,opcode);
-       hex_str_p = next_byte(hex_str_p,opcode);
-       snd_pos_arg =-1;
-       hex_str_p = create_var_array(opcode,counter_pos_arg,hex_str_p,opcode_seventyfour);
-       push_ll(&head, opcode_arg, pos_arg, snd_pos_arg,sr_cnt);
-       
-     }else if(len == 4 && strcmp(opcode, "69") ==0 ){  //store constants / load attribs
-       
-        for(j=len;j>0;j--){
+	 for(j=4;j>0;j--){
 	 
          hex_str_p = next_byte(hex_str_p, opcode);
-	 if(j==len)
-           strcpy(values,strrev(opcode));
+	 if(j==4)
+           strcpy(values1,strrev(opcode));
 	 else
-	   strcat(values,strrev(opcode));
+	   strcat(values1,strrev(opcode));
 	 //printf("%s",opcode);
        }
 	//printf("%s\t",strrev(values));
-       printf("%d\t", htod(strrev(values))); 
+       printf("vals %d\t", htod(strrev(values1))); 
        //push value to array;
-       len_const_array = push(htod(strrev(values))); // pudhing to array of contants ..   ****
-       //printf("const_array_len:%d",len_const_array); 
-     }
-    }
-    
-    printf("\n");
-    // printll(head);
-    //print_var_array(opcode_seventyfour);
-    // call to do the operations
-    //for(i=0;i<len_const_array;i++)
-    //printf("%d\t",const_array[i]);
-    start_interpreter(head,const_array);
+       len_const_array = push(htod(strrev(values1)));
+       printf("length %d",len_const_array);
+      }
+	 
+      i++;
+      }
+      
+
+   printf("\n");
+   for(i=0;i<len_const_array;i++){
+
+     printf("%d\n",const_array[i]);
+   }
+
+
+   start_interpreter(instruction_array, const_array);
+   }
   }
-  
-}
-
-unsigned char *create_var_array(char *opcode, int counter, unsigned char *hex_str_p, int opcode_seventyfour){
-
-  char *each_var = malloc(sizeof(char));
-  
-  int i;
- 
-  for(i=counter;i>0;i--){
-
-    hex_str_p = next_byte(hex_str_p, opcode);
-    strcpy(&each_var[i],opcode);
-
-  }
-  
-  //char *element;
-  // take each element and form a string of variable. and create a
-  var_array[opcode_seventyfour] = each_var;
-  return hex_str_p;
-  
-}
-
-
-void print_var_array(int opcode_seventyfour){
-  printf("%d",opcode_seventyfour);
-  int i;
-  for(i= opcode_seventyfour-1; i> 0;i--){
-
-    printf("%s\n",var_array[i-(opcode_seventyfour-2)]);
-  }
-}
