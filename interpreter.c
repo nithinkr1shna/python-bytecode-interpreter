@@ -6,46 +6,55 @@
 #include "functions.h"
 
 extern int len_const_array;
-//extern int *const_array;
+extern int *const_array;
+extern int *dup_const_array;
 //extern int *instruction_array;
 extern int lenofinstr;
-
+extern int no_of_funs;
 
 
 int store_array[256];
 int store_array_index=0;
 int status =0;
-int condition;
 
-int  push_w(int, int, int*, int*);
+int condition;
+int make_counter =0;
+int fn_instructions[SIZE];
+int onethirtyone =0;
+int function_position =0;
+
+int  push_w(int, int, int*, int*,int);
 int  pop_w(int, int, int*, int*);
-void interpreter_loop(int*, int*);
+void interpreter_loop(int*, int*,int,int);
 void push_stack(int);
 int pop(void);
 int sum(int, int);
 int sub(int , int);
 int mul(int , int);
 int divi(int, int);
+int modulo(int, int);
 int  condition_if(int, int*,int*, int);
 int while_loop(int, int*, int*,int);
+int run_func(int,int,int*,int*,int);
 
 void start_interpreter(int *instruction_array, int *const_array){
 
-  interpreter_loop(instruction_array, const_array);
- 
+  int fn_status =0;
+  interpreter_loop(instruction_array, const_array, lenofinstr, fn_status);
+  
 }
 
-void interpreter_loop(int *instructions, int *constants){
+void interpreter_loop(int *instructions, int *constants, int length, int fn_status){
 
   int i,opc;
-  for(i=0;i<lenofinstr;i++){
+  for(i=0;i<length;i++){
 
     printf("opc %d\t",instructions[i]);
     opc = instructions[i];
     switch(opc){
   
     case 100: //64
-      i= push_w(opc,i,instructions, constants);
+      i= push_w(opc,i,instructions, constants,fn_status);
       printf("i %d\t",i);
       break;
     case 90: //5a
@@ -60,7 +69,11 @@ void interpreter_loop(int *instructions, int *constants){
     case 21: // 15 div
       pop_w(opc,i,instructions,store_array);
       break;
+    case 22: // 16 modulo %
+      pop_w(opc,i,instructions,store_array);
+      break;
     case 23: //17 sum
+      printf("running sum");
       pop_w(opc,i,instructions,store_array);
       break;
     case 24: // 18 sub
@@ -73,29 +86,103 @@ void interpreter_loop(int *instructions, int *constants){
     case 113: //71 absolute jump while loop
       // jump hence present while loop
       printf("jump addr %d\n",instructions[i+1]);
-      i=while_loop(i,instructions,store_array,status);    
+      i=while_loop(i,instructions,store_array,fn_status);    
       break;
     case 71: //47 print
       printf("\nans is %d\n",pop());
+      break;
+    case 131: // call fn 83
+      i=push_w(opc, i,instructions,store_array,fn_status);
+      printf("return position after fn call :%d\t",i);
+      fn_status =0;
+      break;
+    case 124: // load ref 7c
+      i = push_w(opc,i,instructions,store_array,fn_status);
+      break;
+    case 125: // 7d store
+      printf("in 7d store");
+      i = push_w(opc, i,instructions,store_array,fn_status);
       break;
     }
   }
  }
 
 
-int  push_w(int ins, int pos, int* instructions, int* constants){
+int  push_w(int ins, int pos, int* instructions, int* constants, int fn_status){
 
-  int args =0;
-  if(ins =100) // 64
-    args =2;
+  if(ins == 100){ // 64 
+      if(instructions[pos+3] == 132){ // 84 make function
 
-  if(args ==2){
+    
+           push_stack(instructions[pos+1]); //push position of function to stack
+           //pos = pos+5;
+	   printf("changed pos %d %d\t",pos+5 ,pos);
+    
+      }else{
 
+	if(fn_status ==0){
 
-    push_stack(constants[instructions[pos+1]]);
-    pos =pos+2;
+	   printf("no of fnx:%d",no_of_funs);
+           push_stack(constants[instructions[pos+1] - no_of_funs]);
+	   printf("\npushing to stack at 64 withe status =0: %d\n",constants[instructions[pos+1]]);
+           pos =pos+2;
+	}else if(fn_status ==1){
+
+	  printf("no of fnx:%d",no_of_funs);
+	  push_stack(fun[function_position].local_constants[instructions[pos+1] -len_const_array]);
+	  
+	  printf("\npushing to stack at 64 with status =1 7c : %d\n",fun[function_position].local_constants[instructions[pos+1]]);
+	  pos = pos+2;
+	  
+	}
+      }
+  }else if(ins == 131){ // call function
+    int l;
+    printf("inside call");
+      int  temp =pos,args_length=0,hop=0,which_function;
+      onethirtyone =pos;
+      pos = pos+1;
+      args_length = instructions[pos]; // first argument of function call showing taking how many argumnts
+    
+      hop = (args_length+1);
+      printf("\nstore_array:");
+      for(l=0;l<3;l++){
+
+	printf("%d\t",store_array[l]);
+	
+	
+      }
+      
+      while(hop>0){
+
+        pos = pos-3;
+	printf("\nstack element pushing at call: %d\n",store_array[instructions[pos-3]]);
+        push_stack(store_array[instructions[pos]]);
+
+       
+        hop--;
+     }
+      which_function = pop();
+      function_position = which_function;
+      printf("which fn:%d\t",which_function);
+      pos = run_func(which_function,onethirtyone,instructions,store_array,args_length);
+    
+    
+    
+  }else if(ins == 124){ // 7c push refrence of local_varnames to stack
+
+    push_stack(const_array[instructions[pos+1]]);
+    pos = pos+2;
+
+  }else if(ins == 125){
+
+    int next_pos = pos+1;
+    int val= instructions[next_pos];
+    int top = pop();
+    printf("storing %d\n",top);
+    const_array[val] = top;
+    pos = pos+2;
   }
-
   return pos;
   
 }
@@ -120,17 +207,27 @@ int pop_w(int ins, int pos, int* instructions, int *constants){
     printf("loading : %d %d\n",next,store_array[next]);
     pos=pos+2;
     
+  }else if (ins == 22){ // binary modulo %
+
+    int bottom =0, top=0;
+    top = pop();
+    bottom = pop();
+    printf("top: %d bottom : %d\t",top,bottom);
+    push_stack(modulo(bottom,top));
+
   }else if(ins == 23){ // 17 sum
 
     int bottom =0, top=0;
     top =pop();
     bottom =pop();
+    printf("top: %d bottom : %d\t",top,bottom);
     push_stack(sum(top,bottom));
     
   }else if(ins ==24){ // 18 sub;
     int bottom=0,top=0;
     top=pop();
     bottom=pop();
+    printf("bottom: %d top %d\n",bottom,top);
     push_stack(sub(bottom,top));
 
   }else if(ins == 20){ // 14 mul
@@ -153,33 +250,10 @@ int pop_w(int ins, int pos, int* instructions, int *constants){
 
 
 
-// basic arithmatic functions
-
-int sum(int a, int b){
-  printf("the sum is %d\n",a+b);
-  return a+b;
-  
-}
-
-int sub(int a, int b){
-
-  return a-b;
-}
-
-int mul(int a, int b){
-
-  return a*b;
-}
-
-int divi(int a, int b){
-
-  return a/b;
-}
-
 
 //other fns
 
-int condition_if(int pos, int *instructions, int *constants,int status){
+int condition_if(int pos, int *instructions, int *constants,int fn_status){
 
   int operator, top=0,bottom =0,pos1;
   operator = instructions[pos+1];
@@ -219,7 +293,10 @@ int condition_if(int pos, int *instructions, int *constants,int status){
         int hop = instructions[pos-8];
         printf("positions hop: %d pos :%d\n",hop,pos-9);
         printf("total hops %d\n",hop+pos-9);
-        return hop+(pos-9);
+	if(fn_status ==1)
+           return hop+(pos-9);
+	else
+	  return hop+(pos-9);
       }else{
         while(instructions[pos] != 72){
           printf("in skip\n");
@@ -330,4 +407,26 @@ int while_loop(int pos, int* instructions, int *constants,int status){
   pos = next;
   
   return pos-1;
+}
+
+
+int run_func(int fun_pos, int old_pos, int* instructions, int* store_array, int no_of_args){
+
+  if(no_of_args = 2){
+
+    int len_of_fn = fun[fun_pos].ln_of_fn_body, in_function;
+    printf("lnof functin: %d",len_of_fn);
+    printf("fns pos%d",fun_pos);
+    int l=0;
+    for(l=0;l<len_of_fn-1;l++){
+
+      fn_instructions[l] = fun[fun_pos].fn_body[l];
+      printf("inst:%d\t",fn_instructions[l]);
+      
+    }
+    in_function =1;
+    interpreter_loop(fn_instructions,const_array,len_of_fn, in_function);
+    
+  }
+  return onethirtyone+3;
 }

@@ -8,7 +8,7 @@ extern int len_const_array;
 extern int *const_array;
 int stack_size;
 
-int stack[200];
+int stack[10000];
 //functions for stack manipulations
 
 
@@ -74,8 +74,11 @@ void push_stack(int a){
   stack[len] = a;
   stack_size = len+1;
   len = len+1;
- 
-  
+
+    printf("\nstack: ");
+  for(i=0;i<len;i++)
+    printf("%d\t",stack[i]);
+      printf("\n");
   
 }
 
@@ -96,101 +99,36 @@ unsigned char *next_byte(unsigned char *hex_str_p, char *opcode){
   
 }
 
-//determines length of offset
 
-int deter_len(char *opcode){
 
-  if(strcmp(opcode,"69") == 0) // start
-    return 4;
-  else if(strcmp(opcode, "64") == 0 || strcmp(opcode, "5A") == 0 || strcmp(opcode, "65") == 0 || strcmp(opcode,"6B") == 0 || strcmp(opcode, "6E") == 0 || strcmp(opcode, "71") == 0 || strcmp(opcode,"78") == 0 || strcmp(opcode,"74") == 0)
-    //load const, store_name , load_name
-    return 2;
-  else if(strcmp(opcode,"17") == 0 || strcmp(opcode,"47") == 0 || strcmp(opcode,"48") == 0 || strcmp(opcode, "53") == 0 || strcmp(opcode,"18") == 0 || strcmp(opcode,"15") == 0 || strcmp(opcode, "14") == 0 || strcmp(opcode, "00") ==0 || strcmp(opcode, "01") ==0 || strcmp(opcode, "02") ==0 || strcmp(opcode, "02") ==0  || strcmp(opcode,"03")==0 || strcmp(opcode,"04")==0 || strcmp(opcode,"05")==0 || strcmp(opcode,"06") ==0 || strcmp(opcode,"07") ==0 || strcmp(opcode,"08") ==0 || strcmp(opcode,"09") ==0 || strcmp(opcode,"40") ==0) 
-    return 0;
-  else
-    return -1;
+
+// basic arithmatic functions
+
+int sum(int a, int b){
+  printf("the sum is %d\n",a+b);
+  return a+b;
+  
 }
 
-/*
-// create instruction set as linked list;
-void push_ll(instruction_node **headRef, int opcode, int pos, int snd_pos, int sr){ // creates ll on the go
+int sub(int a, int b){
 
-  instruction_node *current = *headRef;
-  instruction_node* newNode, *temp;
-  newNode =(instruction_node*)malloc(sizeof(instruction_node));
-  if(newNode == NULL){
-
-    printf("Cant Allocate\n");
-    exit(0);
-  }
-  newNode->opcode = opcode;
-  newNode->pos = pos;
-  newNode->snd_pos = snd_pos;
-  newNode->sr = sr;
-  newNode->next = NULL;
-  newNode->prev = NULL;
-  //printf("%d %d %d\t",opcode,pos,snd_pos);
-  
-  if(current == NULL){
-    
-    newNode->prev = NULL;
-    *headRef = newNode;
-    
-    
-    
-    
-  }else{
-    while(current->next != NULL){
-      current = current->next;
-    }
-    
-    //temp = current;
-     current->next = newNode;
-    newNode->prev = current; // added extra
-   
-   
-    
-  }
+  return a-b;
 }
 
+int mul(int a, int b){
 
-// prints the instruction set
-void printll(instruction_node *ll){
-  printf("call\t");
-  int counter =0;
-  instruction_node *current,*snd;
-  for(current = ll;current != NULL; current= current->next){
-    counter++;
-    //printf("inside ll\t'");
-    printf("\n%d\t", current->sr);
-    printf("%d\t",current->opcode);
-    printf("%d\t",current->pos);
-    printf("%d\n",current->snd_pos);
-    
-        
-  }
-  
-  
+  return a*b;
+}
+
+int divi(int a, int b){
+
+  return a/b;
+}
+
+int modulo(int a, int b){
+
+  return a%b;
 }
 
 
 
-int push_gen(int a, int* array){
-   int  *ptr;
-  static int k=0;
-  
-  if(k==0){
-    array =(int*)malloc(sizeof(int) * 1);
-    *array = a;
-  }
-  else{
-
-    ptr = (int*)realloc(array,sizeof(int) *k);
-    *(ptr + k) =a;
-  }
- 
-  k= k+1;
-  return k;
-    
-}
-*/
