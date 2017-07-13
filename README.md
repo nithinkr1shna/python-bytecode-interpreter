@@ -13,15 +13,15 @@ Usage:
 A pyvm executable is created which takes .pyc files as command line input.
 
 ```
-	./pyvm *.pyc
+    ./pyvm *.pyc
 	
 ```
 
 Running Testcodes:
 
 ```
-	./pyvm testcodes/fac.pyc
-	./pyvm testcodes/loop.pyc
+    ./pyvm testcodes/fac.pyc
+    ./pyvm testcodes/loop.pyc
 	
 ```
 
