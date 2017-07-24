@@ -25,11 +25,22 @@ int push(int a){
   
   if(i==0){
     const_array =(int*)malloc(sizeof(int) * 1);
+    if(const_array == 0){
+
+      perror("error in malloc: push()");
+      exit(1);
+    }
     *const_array = a;
   }
   else{
 
     ptr = (int*)realloc(const_array,sizeof(int) *i+1);
+    if(ptr ==0){
+
+      perror("error in realloc: push()");
+      free(const_array);
+      exit(1);
+    }
     *(ptr + i) =a;
   }
 
@@ -47,7 +58,12 @@ char* strrev(char *str){
     char temp, *ptr = NULL;
      
     len = strlen(str);  
-    ptr = malloc(sizeof(char)*(len+1)); 
+    ptr = malloc(sizeof(char)*(len+1));
+    if(ptr == 0){
+
+      perror("error in malloc: strrev()");
+      exit(1);
+    }
     ptr = strcpy(ptr,str);           
     for (start=0,end=len-1; start<=end; start++,end--)
     {
@@ -86,11 +102,22 @@ void push_stack(int a){
   //printf("in stack");
   if(l==0){
     stack =(int*)malloc(sizeof(int) * 1);
+    if(stack == 0){
+
+      perror("error in malloc: push_stack()");
+      exit(1);
+    }
     *stack = a;
   }
   else{
 
     ptr = (int*)realloc(stack,sizeof(int) * l+1);
+    if(ptr ==0){
+
+      perror("error in realloc : push_stack()");
+      free(stack);
+      exit(1);
+    }
     *(ptr + l) =a;
   }
  
