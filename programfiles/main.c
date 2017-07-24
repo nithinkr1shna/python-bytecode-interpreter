@@ -67,7 +67,7 @@ int main(int argc , char **argv){
   }else{
     FILE *pyc_pointer;
     size_t n;
-    time_tm time;
+    time_t time;
     int start=0, counter_local_const=0;
     int len,check=0,counter=0,opcode_seventyfour=0,counter_mgc=MGC, counter_ts = TIMESTAMP;
     unsigned char buffer[2],hex_str[SIZE*8];
@@ -89,7 +89,7 @@ int main(int argc , char **argv){
     }else{
 
       printf("Error, opening file %s\n",argv[1]);
-      exit(1);
+      exit(0);
     }
     *(hex_str_p+1) ='\0';
     fclose(pyc_pointer);
