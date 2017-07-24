@@ -26,5 +26,3 @@ Running Testcodes:
 ```
 
 "testfile.py" is a python script for testing, it tests for factorial, even, loop and lmn .pyc files. This test file should be run only after make.
-
-
