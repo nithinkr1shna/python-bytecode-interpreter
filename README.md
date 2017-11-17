@@ -11,7 +11,7 @@ It also supports basic looping with while and simple functions with no recursive
 * LOAD_CONST : 64
 * BINARY_SUM : 17
 * JUMP_WHILE : 71
-* PRINT_ITEM :47
+* PRINT_ITEM : 47
 
 ### Installation and Usage:
 
