@@ -2,10 +2,16 @@
 
 A bytecode interpreter for v 2.7.10
 
-The interpreter is purely coded in C. The interpreter takes the compiled python ".pyc" file as input. This bytecode is converted into hex and each of the instructions are interperted.
+The interpreter is purely coded in C. The interpreter takes the compiled python ".pyc" file as input. This file which contains the bytecode is converted into hex and each of the instructions are interperted accordingly. This interpreter has two C files, one of it converts the bytecode to corresponding hex and the other one does the interpreting.
 
 This interpreter supports basic arithmetic operations addition, substraction, division, multiplication and modulo operation on integers.
 It also supports basic looping with while and simple functions with no recursive calls.
+
+### Instructions and their hex values 
+* LOAD_CONST : 64
+* BINARY_SUM : 17
+* JUMP_WHILE : 71
+* PRINT_ITEM :47
 
 ### Installation and Usage:
 
