@@ -1,10 +1,13 @@
 # python-bytecode-interpreter
+
 A bytecode interpreter for v 2.7.10
+
+The interpreter is purely coded in C. The interpreter takes the compiled python ".pyc" file as input. This bytecode is converted into hex and each of the instructions are interperted.
 
 This interpreter supports basic arithmetic operations addition, substraction, division, multiplication and modulo operation on integers.
 It also supports basic looping with while and simple functions with no recursive calls.
 
-Installation and Usage:
+### Installation and Usage:
 
 ```
      make
