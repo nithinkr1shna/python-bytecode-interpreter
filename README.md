@@ -7,11 +7,13 @@ The interpreter is purely coded in C. The interpreter takes the compiled python 
 This interpreter supports basic arithmetic operations addition, substraction, division, multiplication and modulo operation on integers.
 It also supports basic looping with while and simple functions with no recursive calls.
 
-### Instructions and their hex values 
-* LOAD_CONST : 64
-* BINARY_SUM : 17
-* JUMP_WHILE : 71
-* PRINT_ITEM : 47
+##### Instructions and their hex values 
+Some of the Instructions and their equivalent hex values as in Python v 2.7.10
+
+     LOAD_CONST : 64
+     BINARY_SUM : 17
+     JUMP_WHILE : 71
+     PRINT_ITEM : 47
 
 ### Installation and Usage:
 
