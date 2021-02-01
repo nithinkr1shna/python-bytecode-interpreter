@@ -2,17 +2,18 @@ import os, subprocess
 
 
 def factorial_test(output):
-    expected = [1,2,4,5,10,20,25,50,100]
+    expected = [1, 2, 4, 5, 10, 20, 25, 50, 100]
     output =  map(int,output)
     
     if output == expected:
-        print "Test for factorial :\t PASSED"
+        print "Test for factorial:\t PASSED"
     else:
         print "Test for factorial:\t FAILED"
 
 def lmn_test(output):
     output = map(int, output)
     expected = [12]
+
     if output == expected:
         print "Test for lmn:\t\t PASSED"
     else:
@@ -20,7 +21,8 @@ def lmn_test(output):
 
 def even_test(output):
     output = map(int, output)
-    expected = [20,18,16,14,12,10,8,6,4,2]
+    expected = [20, 18, 16, 14, 12, 10, 8, 6, 4, 2]
+
     if output == expected:
         print "Test for even:\t\t PASSED"
     else:
@@ -28,7 +30,8 @@ def even_test(output):
 
 def loop_test(output):
     output = map(int, output)
-    expected = [1,1,1,1,1]
+    expected = [1, 1 ,1, 1, 1]
+
     if output ==expected:
         print "Test for loop:\t\t PASSED"
     else:
@@ -53,5 +56,3 @@ if __name__ == "__main__":
                 loop_test(program_output)
         except:
             print "Error in opening "
-       
-    
