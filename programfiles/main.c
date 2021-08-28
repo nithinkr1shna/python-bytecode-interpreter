@@ -35,14 +35,9 @@ int lenofinstr = 0, k = 0, l = 0;
 int struct_index = 0;
 int no_of_funs = 0;
 
-//int const_array_pos[SIZE];
-
 int i = 0, counter = 0, len_const_array = 0;
 char * var_array[SIZE];
 int no_fns;
-
-//-----------------------------------------
-// external functions
 
 int push(int);
 void start_interpreter(int * , int * );
@@ -83,8 +78,8 @@ int main(int argc, char ** argv) {
     fclose(pyc_pointer);
     hex_str_p = hex_str;
     printf("\n");
-    //copying magic to magic and comparing magic to 2.7.10
 
+    // Copying magic to magic and comparing magic to 2.7.10
     i = counter_mgc;
     while (i > 0) {
       hex_str_p = next_byte(hex_str_p, opcode);
@@ -99,7 +94,7 @@ int main(int argc, char ** argv) {
       exit(0);
     }
 
-    //copying timestamp of pyc file  to timestamp
+    // Copying timestamp of pyc file to timestamp
     i = counter_ts;
     while (i > 0) {
       hex_str_p = next_byte(hex_str_p, opcode);
@@ -110,7 +105,8 @@ int main(int argc, char ** argv) {
       i--;
     }
 
-    //skipping mainfun attributes;
+    // Skipping mainfun attributes;
+
     i = 16;
     while (i > 0) {
       hex_str_p = next_byte(hex_str_p, opcode);
@@ -120,11 +116,10 @@ int main(int argc, char ** argv) {
     hex_str_p = next_byte(hex_str_p, opcode);
     hex_str_p = next_byte(hex_str_p, opcode);
 
-    // getting the length of main instructions 
-
+    // Getting the length of main instructions 
     if (strcmp(opcode, "73") == 0 && start == 0) {
       start = 1;
-      //get next 4 bytes = length of instructions.
+      // Get next 4 bytes = length of instructions.
       for (i = 4; i > 0; i--) {
         hex_str_p = next_byte(hex_str_p, opcode);
         if (i == 4)
@@ -141,10 +136,10 @@ int main(int argc, char ** argv) {
       hex_str_p = next_byte(hex_str_p, opcode);
       if (i < lenofinstr) {
         instruction_array[i] = htod(opcode);
-        if (strcmp(opcode, "84") == 0) // checking if MAKE FUNCTION present in the instruction.
+        if (strcmp(opcode, "84") == 0) // Checking if MAKE FUNCTION present in the instruction.
           no_fns++;
         no_of_funs = no_fns;
-      } else if (strcmp(opcode, "73") == 0 && no_fns > 0) { // start of functions
+      } else if (strcmp(opcode, "73") == 0 && no_fns > 0) { // Start of functions
         int function_body = 0, local_vars = 0, module_name = 0, fn_name = 0, counter = 0, lenofargmnts = 0;
         for (j = 4; j > 0; j--) {
           hex_str_p = next_byte(hex_str_p, opcode);
@@ -155,20 +150,20 @@ int main(int argc, char ** argv) {
         }
 
         int lenofarg = htod(strrev(values2));
-        fun[struct_index].ln_of_fn_body = lenofarg; // assigning len of fn body [ASSIGN]
+        fun[struct_index].ln_of_fn_body = lenofarg; // Assigning len of fn body [ASSIGN]
         counter = lenofarg;
 
-        while (counter > 0) { // saving fun_body onto struct
+        while (counter > 0) { // Saving fun_body onto struct
           hex_str_p = next_byte(hex_str_p, opcode);
-          fun[struct_index].fn_body[k] = htod(opcode); // assigning function body
+          fun[struct_index].fn_body[k] = htod(opcode); // Assigning function body
           k++;
           counter--;
         }
 
         hex_str_p = next_byte(hex_str_p, opcode);
-        while (strcmp(opcode, "74") != 0) { // for local variables / skiping till local vars
-          if (strcmp(opcode, "69") == 0) { // looking for local constants.
-            // creating local constants.
+        while (strcmp(opcode, "74") != 0) { // For local variables / skiping till local vars
+          if (strcmp(opcode, "69") == 0) { // Looking for local constants.
+            // Creating local constants.
             for (l = 4; l > 0; l--) {
               hex_str_p = next_byte(hex_str_p, opcode);
               if (l == 4)
@@ -186,7 +181,7 @@ int main(int argc, char ** argv) {
         }
 
         int total_no_of_local_vars = 0;
-        while (strcmp(opcode, "74") == 0) { // now at 74
+        while (strcmp(opcode, "74") == 0) {
           for (l = 4; l > 0; l--) {
             hex_str_p = next_byte(hex_str_p, opcode);
             if (l == 4)
@@ -198,7 +193,7 @@ int main(int argc, char ** argv) {
           l = 0;
           while (lenofargmnts > 0) {
             hex_str_p = next_byte(hex_str_p, opcode);
-            fun[struct_index].local_vars_names[l] = htod(opcode); // stores decimal of hex of local variable name;
+            fun[struct_index].local_vars_names[l] = htod(opcode); // Stores decimal of hex of local variable name;
             l++;
             lenofargmnts--;
           }
@@ -208,7 +203,7 @@ int main(int argc, char ** argv) {
         fun[struct_index].cnt_local_variables = total_no_of_local_vars;
         hex_str_p = next_byte(hex_str_p, opcode);
 
-        while (strcmp(opcode, "73") != 0) { // skip until 73
+        while (strcmp(opcode, "73") != 0) { // Skip until 73
           hex_str_p = next_byte(hex_str_p, opcode);
         }
 
@@ -225,13 +220,13 @@ int main(int argc, char ** argv) {
         l = 0;
         while (lenofargmnts > 0) {
           hex_str_p = next_byte(hex_str_p, opcode);
-          fun[struct_index].module_name[l] = htod(opcode); // storing module name .
+          fun[struct_index].module_name[l] = htod(opcode); // Storing module name .
           l++;
           lenofargmnts--;
         }
         hex_str_p = next_byte(hex_str_p, opcode);
         while (strcmp(opcode, "74") != 0) {
-          hex_str_p = next_byte(hex_str_p, opcode); //skip until 74;
+          hex_str_p = next_byte(hex_str_p, opcode); // Skip until 74;
         }
         l = 0;
         for (l = 4; l > 0; l--) {
@@ -243,11 +238,11 @@ int main(int argc, char ** argv) {
         }
         lenofargmnts = 0;
         lenofargmnts = htod(strrev(values5));
-        fun[struct_index].ln_of_name = lenofargmnts; // assigning len of fun name [ASSIGN]
+        fun[struct_index].ln_of_name = lenofargmnts; // Assigning len of fun name [ASSIGN]
         l = 0;
         while (lenofargmnts > 0) {
           hex_str_p = next_byte(hex_str_p, opcode);
-          fun[struct_index].fn_name[l]; // storing fun name
+          fun[struct_index].fn_name[l]; // Storing fun name
           l++;
           lenofargmnts--;
         }
