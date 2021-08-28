@@ -9,7 +9,6 @@
 extern int len_const_array;
 extern int * const_array;
 extern int * dup_const_array;
-//extern int *instruction_array;
 extern int lenofinstr;
 extern int no_of_funs;
 
@@ -41,24 +40,23 @@ char values9[4];
 void start_interpreter(int * instruction_array, int * const_array) {
   int fn_status = 0;
   interpreter_loop(instruction_array, const_array, lenofinstr, fn_status);
-
 }
 
 void interpreter_loop(int * instructions, int * constants, int length, int fn_status) {
   int i, opc;
-  for (i = 0; i < length; i++) {
+  for (i = 0; i < length; i++){
     opc = instructions[i];
     switch (opc) {
-    case LOAD_CONST: //64
+    case LOAD_CONST: // 64
       i = push_w(opc, i, instructions, constants, fn_status);
       break;
-    case STORE_NAME: //5a
+    case STORE_NAME: // 5a
       i = pop_w(opc, i, instructions, constants);
       break;
-    case LOAD_NAME: //65
+    case LOAD_NAME: // 65
       i = pop_w(opc, i, instructions, store_array);
       break;
-    case BINARY_MULTIPLY: //14 mul
+    case BINARY_MULTIPLY: // 14 mul
       pop_w(opc, i, instructions, store_array);
       break;
     case BINARY_DIVIDE: // 15 div
@@ -67,27 +65,27 @@ void interpreter_loop(int * instructions, int * constants, int length, int fn_st
     case BINARY_MODULO: // 16 modulo %
       pop_w(opc, i, instructions, store_array);
       break;
-    case BINARY_SUM: //17 sum
+    case BINARY_SUM: // 17 sum
       pop_w(opc, i, instructions, store_array);
       break;
     case BINARY_SUB: // 18 sub
       pop_w(opc, i, instructions, store_array);
       break;
-    case IF: //6b if
+    case IF: // 6b if
       i = condition_if(i, instructions, store_array, status);
       break;
-    case JUMP_WHILE: //71 absolute jump while loop
-      // jump hence present while loop
+    case JUMP_WHILE: // 71 absolute jump while loop
+      // Jump hence present while loop
       i = while_loop(i, instructions, store_array, fn_status);
       break;
-    case PRINT_ITEM: //47 print
+    case PRINT_ITEM: // 47 print
       printf("%d\n", pop());
       break;
-    case CALL_FUNCTION: // call fn 83
+    case CALL_FUNCTION: // Call fn 83
       i = push_w(opc, i, instructions, store_array, fn_status);
       fn_status = 0;
       break;
-    case LOAD_FAST: // load ref 7c
+    case LOAD_FAST: // Load ref 7c
       i = push_w(opc, i, instructions, store_array, fn_status);
       break;
     case STORE_FAST: // 7d store
@@ -100,8 +98,7 @@ void interpreter_loop(int * instructions, int * constants, int length, int fn_st
 int push_w(int ins, int pos, int * instructions, int * constants, int fn_status) {
   if (ins == LOAD_CONST) { // 64 
     if (instructions[pos + 3] == MAKE_FUNCTION) { // 84 make function
-      push_stack(instructions[pos + 1]); //push position of function to stack
-      //pos = pos+5;
+      push_stack(instructions[pos + 1]); // Push position of function to stack
     } else {
       if (fn_status == 0) {
         push_stack(constants[instructions[pos + 1] - no_of_funs]);
@@ -111,12 +108,12 @@ int push_w(int ins, int pos, int * instructions, int * constants, int fn_status)
         pos = pos + 2;
       }
     }
-  } else if (ins == CALL_FUNCTION) { // call function
+  } else if (ins == CALL_FUNCTION) { // Call function
     int l;
     int temp = pos, args_length = 0, hop = 0, which_function;
     onethirtyone = pos;
     pos = pos + 1;
-    args_length = instructions[pos]; // first argument of function call showing taking how many argumnts
+    args_length = instructions[pos]; // First argument of function call showing taking how many arguments
     hop = (args_length + 1);
     while (hop > 0) {
       pos = pos - 3;
@@ -127,7 +124,7 @@ int push_w(int ins, int pos, int * instructions, int * constants, int fn_status)
     function_position = which_function;
     pos = run_func(which_function, onethirtyone, instructions, store_array, args_length);
 
-  } else if (ins == LOAD_FAST) { // 7c push refrence of local_varnames to stack
+  } else if (ins == LOAD_FAST) { // 7c push reference of local_varnames to stack
 
     push_stack(const_array[instructions[pos + 1]]);
     pos = pos + 2;
@@ -145,7 +142,7 @@ int push_w(int ins, int pos, int * instructions, int * constants, int fn_status)
 
 int pop_w(int ins, int pos, int * instructions, int * constants) {
 
-  if (ins == STORE_NAME) { // store array
+  if (ins == STORE_NAME) { // Store array
     int val = 0, next;
     val = pop();
     next = instructions[pos + 1];
@@ -158,7 +155,7 @@ int pop_w(int ins, int pos, int * instructions, int * constants) {
     push_stack(store_array[next]);
     pos = pos + 2;
 
-  } else if (ins == BINARY_MODULO) { // binary modulo %
+  } else if (ins == BINARY_MODULO) { // Binary modulo %
     int bottom = 0, top = 0;
     top = pop();
     bottom = pop();
@@ -191,16 +188,14 @@ int pop_w(int ins, int pos, int * instructions, int * constants) {
   return pos;
 }
 
-//other fns
-
 int condition_if(int pos, int * instructions, int * constants, int fn_status) {
 
   int operator, top = 0, bottom = 0, pos1;
   operator = instructions[pos + 1];
   top = pop();
-  bottom = pop(); //first
+  bottom = pop(); // first
   switch (operator) {
-  case 0: //<
+  case 0: // <
     if (bottom < top) {
 
       pos = pos + 2;
